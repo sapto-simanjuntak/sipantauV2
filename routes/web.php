@@ -117,6 +117,8 @@ Route::group(['middleware' => ['role:User']], function () {
     // Route::get('data', [DataController::class, 'index'])->name('data.index');
     // Route::get('data/{id}', [DataController::class, 'show'])->name('data.show');
     // Route::resource('data', DataController::class);
+    Route::get('formulir/{id}/view-task', [FormulirController::class, 'giveTask'])->name('formulir.view-task');
+    Route::resource('formulir', FormulirController::class);
 });
 
 
