@@ -30,8 +30,6 @@ use App\Http\Controllers\Project\DashboardController;
 //     return view('welcome');
 // });
 
-Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('register', [AuthController::class, 'register']);
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
@@ -77,7 +75,6 @@ Route::group(
         Route::get('role/{roleId}/give-permissions', [App\Http\Controllers\Akses\RoleController::class, 'addPermissionToRole']);
         Route::put('role/{roleId}/give-permissions', [App\Http\Controllers\Akses\RoleController::class, 'givePermissionToRole']);
 
-
         Route::get('get-roles', [App\Http\Controllers\Global\SelectController::class, 'selectRoles']);
 
         Route::get('get-user', [App\Http\Controllers\Global\SelectController::class, 'selectUser']);
@@ -103,7 +100,8 @@ Route::group(
         Route::get('project/{id}/give-task', [ProjectController::class, 'giveTask'])->name('project.give-task');
         Route::get('formulir/{id}/view-task', [FormulirController::class, 'giveTask'])->name('formulir.view-task');
 
-
+        Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
+        Route::post('register', [AuthController::class, 'register']);
 
 
         Route::resource('tasks', TaskController::class);
