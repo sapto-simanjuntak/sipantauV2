@@ -1,5 +1,4 @@
 @extends('layouts.default')
-
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
@@ -77,6 +76,13 @@
         'content' => view('partials.modals.content.project.pic'),
     ])
 
+    @include('partials.modals.index', [
+        'modalId' => 'modal-validasi',
+        'modalTitle' => 'Validasi Project',
+        'size' => '',
+        'content' => view('partials.modals.content.project.validasi.index'),
+    ])
+
     @include('partials.notification.index')
 
     @include('partials.select2.index')
@@ -87,16 +93,18 @@
     <script>
         $(function() {
             var statuses = @json($statuses);
-            // var users = @json($users);
 
             $('#new_data').click(function() {
                 var statusSelect = $('#status');
-                // var userSelect = $('#user_id');
+                // var validasiSelect = $('#validasi');
                 statusSelect.empty();
+                // validasiSelect.empty();
 
                 $.each(statuses, function(value, label) {
                     statusSelect.append('<option value="' + value + '">' + label + '</option>');
                 });
+
+
 
                 // $.each(users, function(index, user) {
                 //     userSelect.append('<option value="' + user.id + '">' + user.name + '</option>');
@@ -390,6 +398,54 @@
             });
         })
 
+
+        $(document).on('click', '.show_modal_validasi', function() {
+            // var statusSelect = $('#status');
+            var validasis = @json($validasies);
+
+            var validasiSelect = $('#validasi');
+            // statusSelect.empty();
+            validasiSelect.empty();
+
+            $.each(validasis, function(value, label) {
+                validasiSelect.append('<option value="' + value + '">' + label + '</option>');
+            });
+
+            $('#modal-validasi').modal('show');
+            var obj = $(this).data('obj');
+
+            $('#project_id_validasi').val(obj.id);
+            $('#name-validasi').val(obj.name);
+
+            $('#form-add-validasi').off('submit').on('submit', function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: '{{ route('projects.addValidasi') }}',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        round_success_noti(response.success);
+                        $('#modal-validasi').modal('hide');
+                        $('#crudTable').DataTable().ajax.reload();
+                        $('#form-add-edit')[0].reset();
+                        $('#pic').val(null).trigger('change');
+                    },
+                    error: function(xhr, status, error) {
+                        var errors = xhr.responseJSON.errors;
+                        console.log(errors);
+                        $.each(errors, function(key, value) {
+                            $('#' + key).addClass('is-invalid').siblings(
+                                '.invalid-feedback').html(value);
+                        });
+                        round_error_noti(xhr.status + ' ' + xhr.statusText);
+                    }
+                });
+            });
+        });
+
         var datatable = $('#crudTable').DataTable({
             processing: true,
             serverSide: true,
@@ -406,8 +462,8 @@
                     name: 'name'
                 },
                 {
-                    data: 'description',
-                    name: 'description'
+                    data: 'description_before',
+                    name: 'description_before'
                 },
                 {
                     data: 'status',

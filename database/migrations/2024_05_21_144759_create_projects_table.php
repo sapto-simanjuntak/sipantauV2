@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
+            $table->text('description_before');
+            $table->text('description_after');
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();

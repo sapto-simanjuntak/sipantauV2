@@ -65,7 +65,6 @@ Route::group(
         Route::resource('user', UserController::class);
         // Route::delete('/user/{id}', [UserController::class, 'delete'])->name('user.delete');
 
-
         Route::get('user/{id}/roles', [App\Http\Controllers\Akses\UserController::class, 'getUserRoles'])->name('user.roles');
 
         Route::resource('data', DataController::class);
@@ -95,6 +94,7 @@ Route::group(
         // Route::post('/projects/{project}/add-pic', [ProjectController::class, 'addPic'])->name('projects.addPic');
         Route::post('/projects/add-pic', [ProjectController::class, 'addPic'])->name('projects.addPic');
         Route::post('/projects/delete-pic', [ProjectController::class, 'deletePic'])->name('projects.deletePic');
+        Route::post('/projects/add-validasi', [ProjectController::class, 'addValidasi'])->name('projects.addValidasi');
 
         // Route::get('project/{id}/give-task', [App\Http\Controllers\Project\ProjectController::class, 'addTask']);
         Route::get('project/{id}/give-task', [ProjectController::class, 'giveTask'])->name('project.give-task');
@@ -115,8 +115,8 @@ Route::group(['middleware' => ['role:User']], function () {
     // Route::get('data', [DataController::class, 'index'])->name('data.index');
     // Route::get('data/{id}', [DataController::class, 'show'])->name('data.show');
     // Route::resource('data', DataController::class);
-    Route::get('formulir/{id}/view-task', [FormulirController::class, 'giveTask'])->name('formulir.view-task');
-    Route::resource('formulir', FormulirController::class);
+    // Route::get('formulir/{id}/view-task', [FormulirController::class, 'giveTask'])->name('formulir.view-task');
+    // Route::resource('formulir', FormulirController::class);
 });
 
 

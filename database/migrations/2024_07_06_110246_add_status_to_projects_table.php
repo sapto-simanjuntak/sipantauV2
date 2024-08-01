@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('created_user')->nullable();
             $table->string('validated')->default('Pending');
             $table->unsignedBigInteger('validated_by')->nullable();
-            $table->dateTime('validated_date')->nullable();;
+            $table->dateTime('validated_date')->nullable();
+            $table->string('file_path')->nullable();
         });
     }
 

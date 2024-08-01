@@ -21,6 +21,8 @@ class ProjectController extends Controller
     {
         $users = User::all();
         $statuses = Project::$statuses; // Ambil data status untuk proyek
+        $validasies = Project::$validated; // Ambil data validasi untuk proyek
+
 
         if (request()->ajax()) {
             $query = Project::with('users'); // Include users relation
@@ -54,12 +56,17 @@ class ProjectController extends Controller
                     return $project->user_created ? $project->user_created->name : '-'; // Menampilkan nama pengguna
                 })
                 ->addColumn('validated_by', function ($project) {
-                    return $project->validatedBy ? $project->validatedBy->name : '-'; // Menampilkan nama pengguna
+                    if ($project->validatedBy) {
+                        return $project->validatedBy->name; // Menampilkan nama pengguna jika ada
+                    } else {
+                        return '<a href="#" class="btn btn-success btn-sm show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($project), ENT_QUOTES, 'UTF-8') . '">Validate</a>';
+                    }
+                    // return $project->validatedBy ? $project->validatedBy->name : '-'; // Menampilkan nama pengguna
                 })
-                ->rawColumns(['action', 'pic'])
+                ->rawColumns(['action', 'pic', 'validated_by'])
                 ->make();
         }
-        return view('pages.modul.project.index', compact('statuses', 'users'));
+        return view('pages.modul.project.index', compact('statuses', 'users', 'validasies'));
     }
 
 
@@ -73,7 +80,6 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -168,6 +174,8 @@ class ProjectController extends Controller
         }
     }
 
+
+
     public function deletePic(Request $request)
     {
         $request->validate([
@@ -218,5 +226,32 @@ class ProjectController extends Controller
         }
 
         return view('pages.modul.project.addTask', compact('project', 'statuses'));
+    }
+
+    public function addValidasi(Request $request)
+    {
+        $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'validated' => 'required|in:Pending,Approved,Rejected', // Validasi status validasi
+        ]);
+
+        try {
+            $projectId = $request->input('project_id');
+            $validated = $request->input('validated');
+            $validatedBy = auth()->id(); // Mendapatkan ID pengguna yang saat ini login
+            $validatedDate = now(); // Mendapatkan waktu saat ini
+
+            $project = Project::findOrFail($projectId);
+
+            // Update status validasi, siapa yang memvalidasi, dan tanggal validasi
+            $project->validated = $validated;
+            $project->validated_by = $validatedBy;
+            $project->validated_date = $validatedDate;
+            $project->save();
+
+            return response()->json(['success' => 'Project updated successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update project.'], 500);
+        }
     }
 }

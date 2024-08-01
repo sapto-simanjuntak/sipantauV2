@@ -73,13 +73,44 @@ class FormulirController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'name' => 'required|string|max:255',
+    //         'description' => 'required|string',
+
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => $validator->errors()], 422);
+    //     }
+
+    //     try {
+    //         $obj = new Project();
+    //         $obj->name = $request->name;
+    //         $obj->description = $request->description;
+    //         $obj->start_date = null; // Atur null jika tidak ada nilai
+    //         $obj->end_date =  null; // Atur null jika tidak ada nilai
+    //         $obj->status = Project::STATUS_NOT_STARTED; // Default status
+    //         $obj->created_user = auth()->id(); // Pastikan kolom ini sesuai dengan tabel Anda
+    //         $obj->validated = Project::STATUS_PENDING;
+    //         $obj->validated_by = null; // Pastikan kolom ini sesuai dengan tabel Anda
+    //         $obj->save();
+
+    //         return response()->json(['success' => 'Proyek berhasil dibuat.'], 200);
+    //     } catch (Exception $err) {
+    //         Log::error($err);
+    //         return response()->json(['error' => 'Terjadi kesalahan saat membuat proyek baru.'], 500);
+    //     }
+    // }
+
     public function store(Request $request)
     {
+        // Validasi input
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            // 'start_date' => 'nullable|date', // Tambahkan validasi untuk start_date
-            // 'end_date' => 'nullable|date|after_or_equal:start_date', // Tambahkan validasi untuk end_date
+            'description_before' => 'required|string',
+            'fileUpload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validasi file
         ]);
 
         if ($validator->fails()) {
@@ -87,15 +118,25 @@ class FormulirController extends Controller
         }
 
         try {
+            // Simpan data proyek
             $obj = new Project();
             $obj->name = $request->name;
-            $obj->description = $request->description;
+            $obj->description_before = $request->description_before;
+            $obj->description_after = $request->description_after;
             $obj->start_date = null; // Atur null jika tidak ada nilai
-            $obj->end_date =  null; // Atur null jika tidak ada nilai
+            $obj->end_date = null; // Atur null jika tidak ada nilai
             $obj->status = Project::STATUS_NOT_STARTED; // Default status
             $obj->created_user = auth()->id(); // Pastikan kolom ini sesuai dengan tabel Anda
             $obj->validated = Project::STATUS_PENDING;
             $obj->validated_by = null; // Pastikan kolom ini sesuai dengan tabel Anda
+
+            // Proses upload file jika ada
+            if ($request->hasFile('fileUpload')) {
+                $file = $request->file('fileUpload');
+                $filePath = $file->store('uploads', 'public'); // Simpan file ke folder 'uploads' dalam disk 'public'
+                $obj->file_path = $filePath; // Simpan path file ke kolom yang sesuai
+            }
+
             $obj->save();
 
             return response()->json(['success' => 'Proyek berhasil dibuat.'], 200);
