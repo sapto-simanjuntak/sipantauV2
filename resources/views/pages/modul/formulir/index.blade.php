@@ -116,12 +116,16 @@
 
                 $('#form').off('submit').submit(function(event) {
                     event.preventDefault();
-                    var formData = $(this).serialize();
+                    // var formData = $(this).serialize();
+                    var formData = new FormData(this);
+
                     $.ajax({
                         url: '{{ route('formulir.store') }}',
                         type: 'POST',
                         data: formData,
                         dataType: 'json',
+                        contentType: false,
+                        processData: false,
                         success: function(response) {
                             round_success_noti(response.success);
                             $('#modal-formulir').modal('hide');

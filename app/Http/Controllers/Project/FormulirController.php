@@ -131,10 +131,20 @@ class FormulirController extends Controller
             $obj->validated_by = null; // Pastikan kolom ini sesuai dengan tabel Anda
 
             // Proses upload file jika ada
+            // if ($request->hasFile('fileUpload')) {
+            //     $file = $request->file('fileUpload');
+            //     $filePath = $file->store('uploads', 'public'); // Simpan file ke folder 'uploads' dalam disk 'public'
+            //     Log::info("Gagal upload file");
+            //     $obj->file_path = $filePath; // Simpan path file ke kolom yang sesuai
+            // }
             if ($request->hasFile('fileUpload')) {
                 $file = $request->file('fileUpload');
-                $filePath = $file->store('uploads', 'public'); // Simpan file ke folder 'uploads' dalam disk 'public'
-                $obj->file_path = $filePath; // Simpan path file ke kolom yang sesuai
+                $filePath = $file->store('uploads', 'public');
+                if ($filePath) {
+                    $obj->file_path = $filePath;
+                } else {
+                    Log::error("Gagal menyimpan file.");
+                }
             }
 
             $obj->save();
