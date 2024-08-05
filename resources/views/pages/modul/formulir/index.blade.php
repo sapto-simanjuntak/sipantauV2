@@ -77,6 +77,13 @@
         'content' => view('partials.modals.content.formulir.create'),
     ])
 
+    @include('partials.modals.index', [
+        'modalId' => 'modal-formulit-edit',
+        'modalTitle' => 'Edit Master Project',
+        'size' => 'lg',
+        'content' => view('partials.modals.content.formulir.edit'),
+    ])
+
     {{--
     @include('partials.modals.index', [
         'modalId' => 'modal-project-edit',
@@ -105,13 +112,6 @@
             // var users = @json($users);
 
             $('#new_data').click(function() {
-                // var statusSelect = $('#status');
-                // statusSelect.empty();
-
-                // $.each(statuses, function(value, label) {
-                //     statusSelect.append('<option value="' + value + '">' + label + '</option>');
-                // });
-
                 $('#modal-formulir').modal('show');
 
                 $('#form').off('submit').submit(function(event) {
@@ -144,6 +144,59 @@
                     });
                 });
             })
+
+
+            $(document).on('click', '.show_modal_edit', function() {
+                var statuses = @json($statuses);
+                // console.log(statuses); // Pastikan data status tersedia di sini
+                $('#modal-formulit-edit').modal('show');
+                var obj = $(this).data('obj');
+                // console.log(obj); // Tambahkan log ini untuk memastikan data proyek diterima
+
+                $('#id').val(obj.id);
+                $('#name-edit').val(obj.name);
+                $('#description-before').val(obj.description_before);
+                $('#description-after').val(obj.description_after);
+
+                // Jangan lupa tambahkan input file jika ada
+                $('#form-edit-formulir').off('submit').on('submit', function(event) {
+                    event.preventDefault();
+
+                    var formData = new FormData(this);
+                    formData.append('_method', 'PUT'); // Tambahkan _method field untuk metode PUT
+
+                    $.ajax({
+                        url: '{{ url('formulir') }}/' + obj.id,
+                        type: 'POST', // Laravel menangani _method untuk PUT di POST
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
+                        success: function(response) {
+                            // console.log(response);
+                            round_success_noti(response.success);
+                            $('#modal-formulit-edit').modal('hide');
+                            $('#crudTable').DataTable().ajax.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            // Menangani kesalahan
+                            var errors = xhr.responseJSON.errors;
+                            if (errors) {
+                                $.each(errors, function(key, value) {
+                                    var input = $('#' + key + '-edit');
+                                    input.addClass('is-invalid')
+                                        .siblings('.invalid-feedback').html(
+                                            value);
+                                });
+                            } else {
+                                // Menangani kesalahan yang tidak terkait dengan validasi form
+                                console.log('Terjadi kesalahan: ' + xhr.responseText);
+                            }
+                        }
+                    });
+                });
+            });
+
         })
 
         var datatable = $('#crudTable').DataTable({

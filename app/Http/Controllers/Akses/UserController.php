@@ -20,8 +20,11 @@ class UserController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $query = User::query();
+            $query =  User::with('roles');
             return DataTables::of($query)
+                ->addColumn('roles', function ($user) {
+                    return $user->roles->pluck('name')->implode(', ');
+                })
                 ->addColumn('action', function ($user) {
                     return '
                     <div class="dropdown">
@@ -31,21 +34,20 @@ class UserController extends Controller
 								    <li>
                                 <a href="#" class="dropdown-item delete" data-id="' . $user->id . '">Hapus</a>
                             </li>
-
 							</ul>
 						</div>
                     </div>';
                 })
-                // ->addColumn('status', function ($stat) {
-                //     return $stat->status == 'active' ? '<div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">Active</div>' : '<div class="badge rounded-pill text-danger bg-light-danger p-2 text-uppercase px-3">Non Active</div>';
-                // })
-                ->rawColumns(['action', 'status'])
+
+                ->rawColumns(['action', 'status', 'roles'])
                 ->make();
         }
         return view('pages.akses.user.index');
 
 
-
+        // ->addColumn('status', function ($stat) {
+        //     return $stat->status == 'active' ? '<div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">Active</div>' : '<div class="badge rounded-pill text-danger bg-light-danger p-2 text-uppercase px-3">Non Active</div>';
+        // })
 
         // $users = User::all();
         // return view('users.index', compact('users'));

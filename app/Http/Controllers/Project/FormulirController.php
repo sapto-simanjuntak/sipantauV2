@@ -11,6 +11,8 @@ use App\Models\Modul\Project;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class FormulirController extends Controller
@@ -20,30 +22,43 @@ class FormulirController extends Controller
      */
     public function index()
     {
-        // $unit = Unit::get();
-        // dd($unit);
-
         $users = User::all();
         $statuses = Project::$statuses; // Ambil data status untuk proyek
 
         if (request()->ajax()) {
-            $query = Project::with('users'); // Include users relation
+            // $query = Project::with('users'); // Include users relation
+            // Filter data berdasarkan role
+            $query = Project::query();
+
+            if (Auth::user()->hasRole('Unit')) {
+                // Jika user memiliki role Unit, hanya tampilkan data yang dimiliki oleh user tersebut
+                $query->where('created_user', Auth::id());
+            } else {
+                // Untuk Superadmin, Admin, dan User, tampilkan semua data
+                $query->with('users');
+            }
+
             return DataTables::of($query)
                 ->addColumn('action', function ($pro) {
+                    // Cek jika proyek sudah divalidasi
+                    $editButton = $pro->validated_by === null
+                        ? '<button class="btn btn-success btn-sm m-1 show_modal_edit" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '"><i class="lni lni-pencil"></i></button>'
+                        : ''; // Tidak menampilkan tombol Edit jika sudah divalidasi
+
                     $deletePicButton = $pro->users->isNotEmpty()
                         ? '<li><a href="#" class="dropdown-item delete_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Delete PIC</a></li>'
                         : '';
+
                     return '<div class="d-none d-sm-flex">
-                 <a class="btn btn-sm m-1 btn btn-warning" href="'  . url('formulir/' . $pro->id . '/view-task') . '"><i class="lni lni-eye"></i></a>
-                </div>';
+                    <a class="btn btn-warning btn-sm m-1" href="'  . url('formulir/' . $pro->id . '/view-task') . '"><i class="lni lni-eye"></i></a>'
+                        . $editButton .
+                        '</div>';
                 })
                 ->addColumn('pic', function ($pro) {
                     if ($pro->users->isNotEmpty()) {
                         return $pro->users->pluck('name')->implode(', ');
                     } else {
                         return '-';
-                        // return '<a href="#" class="btn btn-success btn-sm show_modal_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">PIC</a>';
-
                     }
                 })
                 ->addColumn('created_user', function ($project) {
@@ -52,7 +67,6 @@ class FormulirController extends Controller
                 ->addColumn('validated_by', function ($project) {
                     return $project->validatedBy ? $project->validatedBy->name : '-'; // Menampilkan nama pengguna
                 })
-
                 ->addColumn('row_class', function ($project) {
                     return $this->getRowClass($project->status);
                 })
@@ -175,10 +189,61 @@ class FormulirController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description_before' => 'required|string',
+            'description_after' => 'nullable|string',
+            'fileUpload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validasi file
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            // Temukan data proyek yang ada
+            $obj = Project::findOrFail($id);
+
+            // Perbarui data proyek
+            $obj->name = $request->name;
+            $obj->description_before = $request->description_before;
+            $obj->description_after = $request->description_after;
+            // Tidak merubah start_date dan end_date jika tidak ada input baru
+            // $obj->start_date = $request->start_date; // Uncomment jika ingin memperbarui
+            // $obj->end_date = $request->end_date; // Uncomment jika ingin memperbarui
+            // $obj->status = $obj->status; // Status tetap sama jika tidak diubah
+            // $obj->validated = $obj->validated; // Validasi tetap sama jika tidak diubah
+            // $obj->validated_by = $request->validated_by; // Uncomment jika ingin memperbarui
+
+            // Proses upload file jika ada
+            if ($request->hasFile('fileUpload')) {
+                // Hapus file lama jika ada
+                if ($obj->file_path && Storage::disk('public')->exists($obj->file_path)) {
+                    Storage::disk('public')->delete($obj->file_path);
+                }
+
+                $file = $request->file('fileUpload');
+                $filePath = $file->store('uploads', 'public');
+                if ($filePath) {
+                    $obj->file_path = $filePath; // Simpan path file ke kolom yang sesuai
+                } else {
+                    Log::error("Gagal menyimpan file.");
+                    return response()->json(['error' => 'Gagal menyimpan file.'], 500);
+                }
+            }
+
+            $obj->save();
+
+            return response()->json(['success' => 'Proyek berhasil diperbarui.'], 200);
+        } catch (Exception $err) {
+            Log::error($err->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat memperbarui proyek.'], 500);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.

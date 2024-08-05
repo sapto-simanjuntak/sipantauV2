@@ -17,6 +17,7 @@
                                     <th width="20">No </th>
                                     <th width="200">Name</th>
                                     <th width="200">Email</th>
+                                    <th width="200">Roles</th>
                                     <th width="150">Action</th>
                                 </tr>
                             </thead>
@@ -253,6 +254,10 @@
                 {
                     data: 'email',
                     name: 'email'
+                },
+                {
+                    data: 'roles',
+                    name: 'roles'
                 },
                 {
                     data: 'action',

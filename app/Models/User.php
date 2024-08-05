@@ -7,6 +7,7 @@ use App\Models\Modul\Task;
 use App\Models\Modul\Comment;
 use App\Models\Modul\Project;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -66,4 +67,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Project::class, 'project_user', 'user_id', 'project_id');
     }
+
+    // public function roles()
+    // {
+    //     return $this->belongsToMany(Role::class);
+    // }
 }
