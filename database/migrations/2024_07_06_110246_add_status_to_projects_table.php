@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('projects', function (Blueprint $table) {
             $table->string('status')->default('Not Started');
             $table->unsignedBigInteger('created_user')->nullable();
-            $table->string('validated')->default('Pending');
+            $table->string('validated')->default('Pending')->nullable();
             $table->unsignedBigInteger('validated_by')->nullable();
             $table->dateTime('validated_date')->nullable();
             $table->string('file_path')->nullable();

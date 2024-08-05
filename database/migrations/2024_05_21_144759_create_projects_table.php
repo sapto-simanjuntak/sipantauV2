@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('description_before');
             $table->text('description_after');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
         });
     }

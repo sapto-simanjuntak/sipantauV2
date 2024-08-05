@@ -278,25 +278,55 @@ class ProjectController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description_before' => 'required|string',
+            'description_after' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            // 'status' => 'required|in:' . implode(',', Project::$statuses),
+            'end_date' => 'required|date|after:start_date'
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
         try {
+            // Simpan data proyek
+            $obj = new Project();
+            $obj->name = $request->name;
+            $obj->description_before = $request->description_before;
+            $obj->description_after = $request->description_after;
+            $obj->start_date = $request->start_date; // Atur null jika tidak ada nilai
+            $obj->end_date = $request->end_date; // Atur null jika tidak ada nilai
+            $obj->status = $request->status;
+            $obj->created_user = auth()->id(); // Pastikan kolom ini sesuai dengan tabel Anda
+            $obj->validated = Project::STATUS_PENDING;
+            $obj->validated_by = null; // Pastikan kolom ini sesuai dengan tabel Anda
 
-            Project::create($request->all());
+            if ($request->hasFile('fileUpload')) {
+                $file = $request->file('fileUpload');
+                $filePath = $file->store('uploads', 'public');
+                if ($filePath) {
+                    $obj->file_path = $filePath;
+                } else {
+                    Log::error("Gagal menyimpan file.");
+                }
+            }
 
-            return response()->json(['success' => 'Proyek  berhasil dibuat.'], 200);
+            $obj->save();
+
+            return response()->json(['success' => 'Proyek berhasil dibuat.'], 200);
         } catch (Exception $err) {
             Log::error($err);
-            return response()->json(['error' => 'Terjadi kesalahan saat membuat pengguna baru.'], 500);
+            return response()->json(['error' => 'Terjadi kesalahan saat membuat proyek baru.'], 500);
         }
+
+        // try {
+
+        //     Project::create($request->all());
+
+        //     return response()->json(['success' => 'Proyek  berhasil dibuat.'], 200);
+        // } catch (Exception $err) {
+        //     Log::error($err);
+        //     return response()->json(['error' => 'Terjadi kesalahan saat membuat pengguna baru.'], 500);
+        // }
     }
 
     public function show(Project $project)
