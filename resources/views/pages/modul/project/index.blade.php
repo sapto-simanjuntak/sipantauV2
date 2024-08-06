@@ -143,7 +143,7 @@
             })
 
             $(document).on('click', '.show_modal_edit', function() {
-                var statuses = @json($statuses);
+                // var statuses = @json($statuses);
                 // console.log(statuses); // Pastikan data status tersedia di sini
 
                 $('#modal-project-edit').modal('show');
@@ -153,32 +153,42 @@
 
                 $('#id').val(obj.id);
                 $('#name-edit').val(obj.name);
-                $('#description-edit').val(obj.description);
-                $('#roles-edit').val(obj.roles);
-                $('#start-edit').val(obj.start_date);
-                $('#end-edit').val(obj.end_date);
-                $('#status-edit').val(obj.status);
+                $('#description-before-project').val(obj.description_before);
+                $('#description-after-project').val(obj.description_after);
+                // $('#project-image').attr('src', obj.file_path);
+
+                // var imageUrl = '/storage/' + obj.file_path;
+                // $('#project-image').attr('src', imageUrl);
+
+                // $('#roles-edit').val(obj.roles);
+                // $('#start-edit').val(obj.start_date);
+                // $('#end-edit').val(obj.end_date);
+                // $('#status-edit').val(obj.status);
 
                 // Ambil elemen select status
-                var statusSelect = $('#status-edit');
-                statusSelect.empty(); // Kosongkan pilihan yang ada
+                // var statusSelect = $('#status-edit');
+                // statusSelect.empty(); // Kosongkan pilihan yang ada
 
                 // Loop melalui data statuses dan tambahkan pilihan ke dalam select
-                $.each(statuses, function(key, value) {
-                    var selected = (key === obj.status) ? 'selected' : '';
-                    statusSelect.append('<option value="' + key + '" ' + selected + '>' +
-                        value + '</option>');
-                });
+                // $.each(statuses, function(key, value) {
+                //     var selected = (key === obj.status) ? 'selected' : '';
+                //     statusSelect.append('<option value="' + key + '" ' + selected + '>' +
+                //         value + '</option>');
+                // });
 
                 // Event handler untuk form submit
                 $('#form-edit').off('submit').on('submit', function(event) {
                     event.preventDefault();
-                    var formData = $(this).serialize();
+                    // var formData = $(this).serialize();
+                    var formData = new FormData(this);
+                    formData.append('_method', 'PUT');
 
                     $.ajax({
                         url: '{{ url('projects') }}/' + obj.id,
                         type: 'POST',
                         data: formData,
+                        processData: false,
+                        contentType: false,
                         dataType: 'json',
                         success: function(response) {
                             // console.log(response);

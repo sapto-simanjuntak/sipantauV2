@@ -15,7 +15,7 @@
             required></textarea>
         <p class="text-danger"><b>NB : Lampirkan Flowchart/Alur/Form Sistem Untuk Pembuatan Baru</b></p>
     </div>
-    <div class="mb-3">
+    {{-- <div class="mb-3">
         <label for="start_date">Tanggal Mulai</label>
         <input type="date" class="form-control" name="start_date" value="{{ date('Y-m-d') }}" required>
     </div>
@@ -23,7 +23,7 @@
         <label for="end_date">Tanggal Selesai</label>
         <input type="date" class="form-control" name="end_date" value="{{ date('Y-m-d', strtotime('+1 month')) }}"
             required>
-    </div>
+    </div> --}}
     <div class="mb-3">
         <label for="fileUpload" class="font-weight-bold"><b>Upload Gambar atau Dokumen PDF :</b></label>
         <input type="file" class="form-control" name="fileUpload" id="fileUpload" accept=".jpg,.jpeg,.png,.pdf">

@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Project;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Modul\Task;
 use Illuminate\Http\Request;
 use App\Models\Modul\Project;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Log;
 // use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Modul\Project as ModulProject;
 
@@ -24,7 +26,21 @@ class ProjectController extends Controller
         $validasies = Project::$validated; // Ambil data validasi untuk proyek
 
         if (request()->ajax()) {
+            //
+            $currentUser = Auth::user(); // Ambil pengguna yang sedang login
             $query = Project::with('users'); // Sertakan relasi users
+
+            // Filter proyek berdasarkan peran pengguna
+            if ($currentUser->hasRole('User')) {
+                // Jika peran adalah 'User', hanya ambil proyek yang terkait dengan pengguna
+                $query->whereHas('users', function ($q) use ($currentUser) {
+                    $q->where('user_id', $currentUser->id);
+                });
+            } elseif ($currentUser->hasRole('Superadmin')) {
+                // Jika peran adalah 'Superadmin', ambil semua proyek
+                // Tidak perlu filter di sini
+                // $query sudah berisi semua proyek tanpa batasan
+            }
 
             return DataTables::of($query)
                 ->addColumn('action', function ($pro) {
@@ -54,9 +70,40 @@ class ProjectController extends Controller
                             </div>
                         </div>';
                 })
+
+                ->addColumn('start_date', function ($pro) {
+                    // Format tanggal jika sudah diisi
+                    if ($pro->start_date) {
+                        try {
+                            // Konversi string tanggal menjadi objek Carbon
+                            $startDate = Carbon::parse($pro->start_date);
+                            // Format tanggal menjadi "Tanggal Bulan Tahun"
+                            return $startDate->format('d F Y');
+                        } catch (\Exception $e) {
+                            // Tangani kesalahan jika parsing gagal
+                            return 'Tanggal Tidak Valid';
+                        }
+                    }
+                    // Cek apakah pengguna memiliki peran 'User' atau 'Superadmin' dan `pic` terisi
+                    if ($pro->users->isNotEmpty() && Auth::user()->hasAnyRole(['User', 'Superadmin'])) {
+                        return '<a href="#" class="btn btn-info btn-sm set_start_date" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Set Start Date</a>';
+                    }
+                    return '-'; // Jika `pic` tidak terisi atau pengguna tidak memiliki peran yang sesuai
+                })
+                ->addColumn('end_date', function ($pro) {
+                    if ($pro->end_date) {
+                        $endDate = Carbon::parse($pro->end_date);
+                        // Format tanggal menjadi "Tanggal Bulan Tahun"
+                        return $endDate->format('d F Y');
+                    }
+                    return '-'; // Jika `pic` tidak terisi
+                })
                 ->addColumn('pic', function ($pro) {
                     if ($pro->users->isNotEmpty()) {
-                        return $pro->users->pluck('name')->implode(', ');
+                        // return $pro->users->pluck('name')->implode(', ');
+                        return $pro->users->map(function ($user) {
+                            return '<span class="badge bg-gradient-moonlit me-1">' . htmlspecialchars($user->name, ENT_QUOTES, 'UTF-8') . '</span>';
+                        })->implode(' ');
                     } elseif (Auth::user()->hasRole('Superadmin')) {
                         return '<a href="#" class="btn btn-success btn-sm show_modal_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">PIC</a>';
                     } else {
@@ -78,7 +125,7 @@ class ProjectController extends Controller
                         }
                     }
                 })
-                ->rawColumns(['action', 'pic', 'validated_by'])
+                ->rawColumns(['action', 'start_date', 'end_date', 'pic', 'validated_by'])
                 ->make();
         }
 
@@ -280,8 +327,8 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'description_before' => 'required|string',
             'description_after' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date'
+            // 'start_date' => 'required|date',
+            // 'end_date' => 'required|date|after:start_date'
         ]);
 
         if ($validator->fails()) {
@@ -293,8 +340,8 @@ class ProjectController extends Controller
             $obj->name = $request->name;
             $obj->description_before = $request->description_before;
             $obj->description_after = $request->description_after;
-            $obj->start_date = $request->start_date; // Atur null jika tidak ada nilai
-            $obj->end_date = $request->end_date; // Atur null jika tidak ada nilai
+            $obj->start_date = null; // Atur null jika tidak ada nilai
+            $obj->end_date = null; // Atur null jika tidak ada nilai
             $obj->status = $request->status;
             $obj->created_user = auth()->id(); // Pastikan kolom ini sesuai dengan tabel Anda
             $obj->validated = Project::STATUS_PENDING;
@@ -343,21 +390,44 @@ class ProjectController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'description_before' => 'required|string',
+            'description_after' => 'required|string',
+            // 'start_date' => 'required|date',
+            // 'end_date' => 'required|date|after:start_date',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+
+
         try {
             $obj = Project::findOrFail($request->id);
             $obj->name = $request->name;
-            $obj->description = $request->description;
-            $obj->start_date = $request->start_date;
-            $obj->status = $request->status;
+            $obj->description_before = $request->description_before;
+            $obj->description_after = $request->description_after;
+            // $obj->start_date = $request->start_date;
+            // $obj->status = $request->status;
+
+            // Proses upload file jika ada
+            if ($request->hasFile('fileUpload')) {
+                // Hapus file lama jika ada
+                if ($obj->file_path && Storage::disk('public')->exists($obj->file_path)) {
+                    Storage::disk('public')->delete($obj->file_path);
+                }
+
+                $file = $request->file('fileUpload');
+                $filePath = $file->store('uploads', 'public');
+                if ($filePath) {
+                    $obj->file_path = $filePath; // Simpan path file ke kolom yang sesuai
+                } else {
+                    Log::error("Gagal menyimpan file.");
+                    return response()->json(['error' => 'Gagal menyimpan file.'], 500);
+                }
+            }
+
+
             $obj->save();
             Log::info("Berhasi update data", [$obj]);
             return response()->json(['success' => 'Data ' . $obj->name . ' berhasil diupdate.'], 200);

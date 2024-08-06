@@ -7,7 +7,7 @@
         <input type="text" class="form-control" name="name" id="name-edit" placeholder="Nama Proyek" required>
     </div>
     <div class="mb-3">
-        <label for="description" class="font-weight-bold"> <b>Sebelumnya :</b></label>
+        <label for="description" class="font-weight-bold"><b>Sebelumnya :</b></label>
         <textarea style="height: 200px;" class="form-control" name="description_before" id="description-before"
             placeholder="Deskripsi Sebelumnya" required></textarea>
     </div>
