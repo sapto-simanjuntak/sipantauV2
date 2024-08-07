@@ -45,7 +45,7 @@ class ProjectController extends Controller
             return DataTables::of($query)
                 ->addColumn('action', function ($pro) {
                     $deletePicButton = $pro->users->isNotEmpty()
-                        ? '<li><a href="#" class="dropdown-item delete_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Hapus PIC</a></li>'
+                        ? '<li><a href="#" class="dropdown-item delete_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Delete PIC</a></li>'
                         : '';
 
                     // Cek apakah pengguna adalah Superadmin dan proyek belum divalidasi
@@ -53,6 +53,13 @@ class ProjectController extends Controller
                     if (Auth::user()->hasRole('Superadmin') && !$pro->validated_by) {
                         $validateButton = '<li><a href="#" class="dropdown-item show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Validasi</a></li>';
                     }
+                    // Tombol "Set Start Date"
+                    $setStartDateButton = '';
+                    if ($pro->users->isNotEmpty() && Auth::user()->hasAnyRole(['User', 'Superadmin', 'Admin'])) {
+                        $setStartDateButton = '<li><a href="#" class="dropdown-item set_start_date" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Set Start Date</a></li>';
+                    }
+
+
                     return '
                         <div class="d-none d-sm-flex">
                             <a class="btn btn-sm m-1 btn btn-warning" href="'  . url('project/' . $pro->id . '/give-task') . '"><i class="lni lni-eye"></i></a>
@@ -63,9 +70,10 @@ class ProjectController extends Controller
 
                                     ' . (Auth::user()->hasAnyRole(['Superadmin', 'User']) ? '<li><a href="#" class="dropdown-item show_modal_edit" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Edit</a></li>' : '') . '
 
-                                    ' . (Auth::user()->hasRole('Superadmin') ? '<li><a href="#" class="dropdown-item delete" data-id="' . $pro->id . '">Hapus</a></li>' : '') . '
+                                    ' . (Auth::user()->hasRole('Superadmin') ? '<li><a href="#" class="dropdown-item delete" data-id="' . $pro->id . '">Delete Project</a></li>' : '') . '
 
                                     ' . $validateButton . '
+                                     ' . $setStartDateButton . '
                                 </ul>
                             </div>
                         </div>';
@@ -132,194 +140,6 @@ class ProjectController extends Controller
         return view('pages.modul.project.index', compact('statuses', 'users', 'validasies'));
     }
 
-
-
-
-    // public function index()
-    // {
-    //     $users = User::all();
-    //     $statuses = Project::$statuses; // Ambil data status untuk proyek
-    //     $validasies = Project::$validated; // Ambil data validasi untuk proyek
-
-    //     if (request()->ajax()) {
-    //         $query = Project::with('users'); // Include users relation
-
-    //         return DataTables::of($query)
-    //             ->addColumn('action', function ($pro) {
-    //                 $deletePicButton = $pro->users->isNotEmpty()
-    //                     ? '<li><a href="#" class="dropdown-item delete_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Delete PIC</a></li>'
-    //                     : '';
-
-    //                 // Cek apakah pengguna adalah Superadmin
-    //                 $validateButton = '';
-    //                 if (Auth::user()->hasRole('Superadmin') && !$pro->validated_by) {
-    //                     $validateButton = '<li><a href="#" class="dropdown-item show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Validate</a></li>';
-    //                 }
-
-    //                 return '
-    //             <div class="d-none d-sm-flex">
-    //                 <a class="btn btn-sm m-1 btn btn-warning" href="'  . url('project/' . $pro->id . '/give-task') . '"><i class="lni lni-eye"></i></a>
-    //                 <div class="dropdown m-1">
-    //                     <button class="btn btn-sm btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"> <b>AKSI</b> </button>
-    //                     <ul class="dropdown-menu">
-    //                         ' . $deletePicButton . '
-    //                         <li><a href="#" class="dropdown-item show_modal_edit" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Edit</a></li>
-    //                         <li><a href="#" class="dropdown-item delete" data-id="' . $pro->id . '">Hapus</a></li>
-    //                         ' . $validateButton . '
-    //                     </ul>
-    //                 </div>
-    //             </div>';
-    //             })
-    //             ->addColumn('pic', function ($pro) {
-    //                 if ($pro->users->isNotEmpty()) {
-    //                     return $pro->users->pluck('name')->implode(', ');
-    //                 } else {
-    //                     return '<a href="#" class="btn btn-success btn-sm show_modal_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">PIC</a>';
-    //                 }
-    //             })
-    //             ->addColumn('created_user', function ($project) {
-    //                 return $project->user_created ? $project->user_created->name : '-'; // Menampilkan nama pengguna
-    //             })
-    //             ->addColumn('validated_by', function ($project) {
-    //                 if ($project->validatedBy) {
-    //                     return $project->validatedBy->name; // Menampilkan nama pengguna jika ada
-    //                 } else {
-    //                     // Menampilkan status berdasarkan peran pengguna
-    //                     if (Auth::user()->hasRole('Superadmin')) {
-    //                         return '<a href="#" class="btn btn-success btn-sm show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($project), ENT_QUOTES, 'UTF-8') . '">Validate</a>';
-    //                     } else {
-    //                         return 'Belum Divalidasi';
-    //                     }
-    //                 }
-    //             })
-    //             ->rawColumns(['action', 'pic', 'validated_by'])
-    //             ->make();
-    //     }
-
-    //     return view('pages.modul.project.index', compact('statuses', 'users', 'validasies'));
-    // }
-
-
-
-    // public function index()
-    // {
-    //     $users = User::all();
-    //     $statuses = Project::$statuses; // Ambil data status untuk proyek
-    //     $validasies = Project::$validated; // Ambil data validasi untuk proyek
-
-    //     if (request()->ajax()) {
-    //         $query = Project::with('users'); // Include users relation
-
-    //         return DataTables::of($query)
-    //             ->addColumn('action', function ($pro) {
-    //                 $deletePicButton = $pro->users->isNotEmpty()
-    //                     ? '<li><a href="#" class="dropdown-item delete_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Delete PIC</a></li>'
-    //                     : '';
-
-    //                 // Tampilkan tombol validate jika user adalah Superadmin
-    //                 $validateButton = Auth::user()->hasRole('Superadmin') && !$pro->validated_by
-    //                     ? '<li><a href="#" class="dropdown-item show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Validate</a></li>'
-    //                     : '';
-
-    //                 return '
-    //             <div class="d-none d-sm-flex">
-    //                 <a class="btn btn-sm m-1 btn btn-warning" href="'  . url('project/' . $pro->id . '/give-task') . '"><i class="lni lni-eye"></i></a>
-    //                 <div class="dropdown m-1">
-    //                     <button class="btn btn-sm btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"> <b>AKSI</b> </button>
-    //                     <ul class="dropdown-menu">
-    //                         ' . $deletePicButton . '
-    //                         <li><a href="#" class="dropdown-item show_modal_edit" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Edit</a></li>
-    //                         <li><a href="#" class="dropdown-item delete" data-id="' . $pro->id . '">Hapus</a></li>
-    //                         ' . $validateButton . '
-    //                     </ul>
-    //                 </div>
-    //             </div>';
-    //             })
-    //             ->addColumn('pic', function ($pro) {
-    //                 if ($pro->users->isNotEmpty()) {
-    //                     return $pro->users->pluck('name')->implode(', ');
-    //                 } else {
-    //                     return '<a href="#" class="btn btn-success btn-sm show_modal_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">PIC</a>';
-    //                 }
-    //             })
-    //             ->addColumn('created_user', function ($project) {
-    //                 return $project->user_created ? $project->user_created->name : '-'; // Menampilkan nama pengguna
-    //             })
-    //             ->addColumn('validated_by', function ($project) {
-    //                 if ($project->validatedBy) {
-    //                     return $project->validatedBy->name; // Menampilkan nama pengguna jika ada
-    //                 } else {
-    //                     return '<a href="#" class="btn btn-success btn-sm show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($project), ENT_QUOTES, 'UTF-8') . '">Validate</a>';
-    //                 }
-    //             })
-    //             ->rawColumns(['action', 'pic', 'validated_by'])
-    //             ->make();
-    //     }
-    //     return view('pages.modul.project.index', compact('statuses', 'users', 'validasies'));
-    // }
-
-
-    // public function index()
-    // {
-    //     $users = User::all();
-    //     $statuses = Project::$statuses; // Ambil data status untuk proyek
-    //     $validasies = Project::$validated; // Ambil data validasi untuk proyek
-
-
-    //     if (request()->ajax()) {
-    //         $query = Project::with('users'); // Include users relation
-    //         return DataTables::of($query)
-    //             ->addColumn('action', function ($pro) {
-    //                 $deletePicButton = $pro->users->isNotEmpty()
-    //                     ? '<li><a href="#" class="dropdown-item delete_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Delete PIC</a></li>'
-    //                     : '';
-    //                 return '
-    //             <div class="d-none d-sm-flex">
-    //              <a class="btn btn-sm m-1 btn btn-warning" href="'  . url('project/' . $pro->id . '/give-task') . '"><i class="lni lni-eye"></i></a>
-    //               <div class="dropdown m-1">
-    //                  <button class="btn btn-sm btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"> <b>AKSI</b> </button>
-    //                  <ul class="dropdown-menu">
-    //                   ' . $deletePicButton . '
-
-    //                  <li><a href="#" class="dropdown-item show_modal_edit" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Edit</a></li>
-
-    //                  <li><a href="#" class="dropdown-item delete" data-id="' . $pro->id . '">Hapus</a></li>
-    //                  </ul>
-    //               </div>
-    //             </div>';
-    //             })
-    //             ->addColumn('pic', function ($pro) {
-    //                 if ($pro->users->isNotEmpty()) {
-    //                     return $pro->users->pluck('name')->implode(', ');
-    //                 } else {
-    //                     return '<a href="#" class="btn btn-success btn-sm show_modal_pic" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">PIC</a>';
-    //                 }
-    //             })
-    //             ->addColumn('created_user', function ($project) {
-    //                 return $project->user_created ? $project->user_created->name : '-'; // Menampilkan nama pengguna
-    //             })
-    //             ->addColumn('validated_by', function ($project) {
-    //                 if ($project->validatedBy) {
-    //                     return $project->validatedBy->name; // Menampilkan nama pengguna jika ada
-    //                 } else {
-    //                     return '<a href="#" class="btn btn-success btn-sm show_modal_validasi" data-obj="' . htmlspecialchars(json_encode($project), ENT_QUOTES, 'UTF-8') . '">Validate</a>';
-    //                 }
-    //                 // return $project->validatedBy ? $project->validatedBy->name : '-'; // Menampilkan nama pengguna
-    //             })
-    //             ->rawColumns(['action', 'pic', 'validated_by'])
-    //             ->make();
-    //     }
-    //     return view('pages.modul.project.index', compact('statuses', 'users', 'validasies'));
-    // }
-
-
-
-    // public function create()
-    // {
-
-    //     $statuses = Project::$statuses; // Ambil data status untuk proyek
-    //     return view('pages.modul.project.create', compact('statuses'));
-    // }
 
     public function store(Request $request)
     {
@@ -551,6 +371,36 @@ class ProjectController extends Controller
             $project->save();
 
             return response()->json(['success' => 'Project updated successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update project.'], 500);
+        }
+    }
+
+    public function setStatusproject(Request $request)
+    {
+        if (!Auth::user()->hasRole('Superadmin')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'id' => 'required|exists:projects,id',
+        ]);
+
+        try {
+            $projectId = $request->input('id');
+            $start_date = $request->input('start_date');
+            $end_date = $request->input('end_date');
+            $status = $request->input('status');
+
+            $project = Project::findOrFail($projectId);
+
+            // Update status validasi, siapa yang memvalidasi, dan tanggal validasi
+            $project->start_date = $start_date;
+            $project->end_date = $end_date;
+            $project->status = $status;
+            $project->save();
+
+            return response()->json(['success' => 'Set Status updated successfully.']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to update project.'], 500);
         }

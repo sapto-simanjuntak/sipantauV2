@@ -83,6 +83,13 @@
         'content' => view('partials.modals.content.project.validasi.index'),
     ])
 
+    @include('partials.modals.index', [
+        'modalId' => 'modal-project-startdate',
+        'modalTitle' => 'Set Project',
+        'size' => 'lg',
+        'content' => view('partials.modals.content.project.set-project'),
+    ])
+
     @include('partials.notification.index')
 
     @include('partials.select2.index')
@@ -454,6 +461,57 @@
                                 '.invalid-feedback').html(value);
                         });
                         round_error_noti(xhr.status + ' ' + xhr.statusText);
+                    }
+                });
+            });
+        });
+
+        $(document).on('click', '.set_start_date', function() {
+            var statuses = @json($statuses);
+
+            $('#modal-project-startdate').modal('show');
+
+            var obj = $(this).data('obj');
+
+            $('#set-id').val(obj.id);
+            $('#set_name-edit').val(obj.name);
+            $('#set-status-project').val(obj.status);
+
+            // Ambil elemen select status
+            var statusSelect = $('#set-status-project');
+            statusSelect.empty(); // Kosongkan pilihan yang ada
+
+            // Loop melalui data statuses dan tambahkan pilihan ke dalam select
+            $.each(statuses, function(key, value) {
+                var selected = (key === obj.status) ? 'selected' : '';
+                statusSelect.append('<option value="' + key + '" ' + selected + '>' +
+                    value + '</option>');
+            });
+
+            // Event handler untuk form submit
+            $('#form-set-project').off('submit').on('submit', function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: '{{ route('projects.setStatusproject') }}',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        // console.log(response);
+                        round_success_noti(response.success);
+                        $('#modal-project-startdate').modal('hide');
+                        $('#crudTable').DataTable().ajax.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        var errors = xhr.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            $('#' + key + '-edit').addClass('is-invalid')
+                                .siblings('.invalid-feedback').html(value);
+                        });
+
+                        // Tambahkan kode penanganan error di sini (misalnya, notifikasi kesalahan)
                     }
                 });
             });

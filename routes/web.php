@@ -161,6 +161,7 @@ Route::group(
         Route::post('/projects/add-pic', [ProjectController::class, 'addPic'])->name('projects.addPic');
         Route::post('/projects/delete-pic', [ProjectController::class, 'deletePic'])->name('projects.deletePic');
         Route::post('/projects/add-validasi', [ProjectController::class, 'addValidasi'])->name('projects.addValidasi');
+        Route::post('/projects/set-status-project', [ProjectController::class, 'setStatusproject'])->name('projects.setStatusproject');
         // Route::get('project/{id}/give-task', [ProjectController::class, 'giveTask'])->name('project.give-task');
     }
 );
