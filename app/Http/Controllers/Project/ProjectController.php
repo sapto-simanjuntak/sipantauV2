@@ -56,7 +56,7 @@ class ProjectController extends Controller
                     // Tombol "Set Start Date"
                     $setStartDateButton = '';
                     if ($pro->users->isNotEmpty() && Auth::user()->hasAnyRole(['User', 'Superadmin', 'Admin'])) {
-                        $setStartDateButton = '<li><a href="#" class="dropdown-item set_start_date" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Set Start Date</a></li>';
+                        $setStartDateButton = '<li><a href="#" class="dropdown-item edit_set_start_date" data-obj="' . htmlspecialchars(json_encode($pro), ENT_QUOTES, 'UTF-8') . '">Set Start Date</a></li>';
                     }
 
 

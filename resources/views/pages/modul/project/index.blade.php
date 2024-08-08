@@ -27,21 +27,6 @@
                                     <th width="">End Date</th>
                                     <th width="">PIC</th>
                                     <th width="150">Action</th>
-
-                                    {{-- <th width="20">No </th>
-                                    <th width="200">Name</th>
-                                    <th width="200">Description</th>
-                                    <th width="">Status</th>
-                                    <th width="">Pemohon</th>
-                                    <th width="">Validated</th>
-                                    <th width="">Validated By</th>
-                                    <th width="">Validated Date</th>
-                                    <th width="">Start Date</th>
-                                    <th width="">End Date</th>
-                                    <th width="">PIC IT</th>
-                                    <th width="150">Action</th> --}}
-
-
                                 </tr>
                             </thead>
                             <tbody>
@@ -89,6 +74,15 @@
         'size' => 'lg',
         'content' => view('partials.modals.content.project.set-project'),
     ])
+
+    @include('partials.modals.index', [
+        'modalId' => 'modal-project-edit-startdate',
+        'modalTitle' => 'Edit Set Project',
+        'size' => 'lg',
+        'content' => view('partials.modals.content.project.edit-set-project'),
+    ])
+
+    {{-- edit_set_start_date --}}
 
     @include('partials.notification.index')
 
@@ -502,6 +496,58 @@
                         // console.log(response);
                         round_success_noti(response.success);
                         $('#modal-project-startdate').modal('hide');
+                        $('#crudTable').DataTable().ajax.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        var errors = xhr.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            $('#' + key + '-edit').addClass('is-invalid')
+                                .siblings('.invalid-feedback').html(value);
+                        });
+
+                        // Tambahkan kode penanganan error di sini (misalnya, notifikasi kesalahan)
+                    }
+                });
+            });
+        });
+
+        $(document).on('click', '.edit_set_start_date', function() {
+            var statuses = @json($statuses);
+
+            $('#modal-project-edit-startdate').modal('show');
+
+            var obj = $(this).data('obj');
+
+            $('#edit-set-id').val(obj.id);
+            $('#edit_set_name-edit').val(obj.name);
+            $('#edit-set-start-date').val(obj.start_date);
+            $('#edit-set-end-date').val(obj.end_date);
+
+            // Ambil elemen select status
+            var statusSelect = $('#edit-set-status-project');
+            statusSelect.empty(); // Kosongkan pilihan yang ada
+
+            // Loop melalui data statuses dan tambahkan pilihan ke dalam select
+            $.each(statuses, function(key, value) {
+                var selected = (key === obj.status) ? 'selected' : '';
+                statusSelect.append('<option value="' + key + '" ' + selected + '>' +
+                    value + '</option>');
+            });
+
+            // Event handler untuk form submit
+            $('#edit-form-set-project').off('submit').on('submit', function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: '{{ route('projects.setStatusproject') }}',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        // console.log(response);
+                        round_success_noti(response.success);
+                        $('#modal-project-edit-startdate').modal('hide');
                         $('#crudTable').DataTable().ajax.reload();
                     },
                     error: function(xhr, status, error) {
