@@ -278,43 +278,41 @@
             // }
 
             $('#new_data').click(function() {
-                // Ambil data proyek dari atribut data-obj
                 var project = $(this).data('obj');
-                // Set nilai pada form modal
                 $('#project_id').val(project.id);
                 $('#project_name').val(project.name);
-                // populateStatusDropdown();
-                // Tampilkan modal
                 $('#modal-task').modal('show');
 
                 $('#form-add-task').off('submit').on('submit', function(event) {
                     event.preventDefault();
                     var formData = $(this).serialize();
-                    // console.log(formData);
                     $.ajax({
                         url: '{{ route('tasks.store') }}',
                         type: 'POST',
                         data: formData,
                         dataType: 'json',
                         success: function(response) {
-                            round_success_noti(response.success);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.success,
+                            });
                             $('#modal-task').modal('hide');
                             $('#crudTable').DataTable().ajax.reload();
-                            $('#form-add-task')[0]
-                                .reset();
+                            $('#form-add-task')[0].reset();
                         },
                         error: function(xhr, status, error) {
-                            var errors = xhr.responseJSON.errors;
-                            console.log(errors);
-                            $.each(errors, function(key, value) {
-                                $('#' + key).addClass('is-invalid').siblings(
-                                    '.invalid-feedback').html(value);
+                            var errors = xhr.responseJSON.error;
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: errors,
                             });
-                            round_error_noti(xhr.status + ' ' + xhr.statusText);
                         }
-                    })
+                    });
                 });
             });
+
 
 
             $(document).on('click', '.show_edit_task', function() {

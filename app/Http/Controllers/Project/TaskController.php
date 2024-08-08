@@ -33,7 +33,7 @@ class TaskController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'status' => 'required|string',
-            'project_id' => 'required',
+            'project_id' => 'required|exists:projects,id', // Pastikan project_id ada di tabel projects
         ]);
 
         if ($validator->fails()) {
@@ -41,6 +41,17 @@ class TaskController extends Controller
         }
 
         try {
+            $project = Project::find($request->project_id);
+
+            // Validasi tanggal end_date
+            if (!$project) {
+                return response()->json(['error' => 'Proyek tidak ditemukan.'], 404);
+            }
+
+            if ($request->end_date > $project->end_date) {
+                return response()->json(['error' => 'Tanggal selesai tugas tidak boleh melewati tanggal selesai proyek.'], 422);
+            }
+
             Task::create($request->all());
             return response()->json(['success' => 'Task berhasil dibuat.'], 200);
         } catch (Exception $err) {
@@ -48,6 +59,7 @@ class TaskController extends Controller
             return response()->json(['error' => 'Terjadi kesalahan saat membuat task.'], 500);
         }
     }
+
 
     public function edit(Project $project, Task $task)
     {
