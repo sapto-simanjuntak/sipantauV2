@@ -336,6 +336,9 @@ class ProjectController extends Controller
                             <i class="bx bxs-circle me-1"></i>' . $task->status_description . '
                         </div>';
                 })
+                ->addColumn('comment_count', function ($task) {
+                    return $task->comments->count() . ' comments';
+                })
                 ->rawColumns(['action', 'status']) // Izinkan kolom status untuk render HTML
                 ->make();
         }

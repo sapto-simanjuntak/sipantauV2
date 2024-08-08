@@ -222,6 +222,7 @@
                                     <th width="100px">Status</th>
                                     <th width="100px">Start Date</th>
                                     <th width="100px">End Date</th>
+                                    <th width="50px">Comment</th>
                                     {{-- <th>View Details</th> --}}
                                     <th>Actions</th>
                                 </tr>
@@ -471,6 +472,10 @@
                 {
                     data: 'end_date',
                     name: 'end_date'
+                },
+                {
+                    data: 'comment_count',
+                    name: 'comment_count'
                 },
                 {
                     data: 'action',
