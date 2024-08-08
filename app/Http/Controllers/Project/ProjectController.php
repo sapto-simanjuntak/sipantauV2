@@ -176,7 +176,6 @@ class ProjectController extends Controller
                     Log::error("Gagal menyimpan file.");
                 }
             }
-
             $obj->save();
 
             return response()->json(['success' => 'Proyek berhasil dibuat.'], 200);
@@ -315,7 +314,7 @@ class ProjectController extends Controller
 
     public function giveTask($id)
     {
-        $project = Project::with('tasks')->find($id);
+        $project = Project::with('tasks', 'user_created')->find($id);
         $statuses = Task::$taskStatuses; // Ambil status dari model Task
 
         if (request()->ajax()) {

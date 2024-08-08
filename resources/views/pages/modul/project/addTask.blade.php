@@ -1,7 +1,85 @@
 @extends('layouts.default')
-
+@php
+    use Carbon\Carbon;
+@endphp
 @push('after-style')
     <style>
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .custom-table th {
+            background-color: #3d6b9c;
+            /* Warna latar belakang header tabel */
+            color: #fff;
+            /* Warna teks header tabel */
+            text-align: left;
+            padding: 12px;
+        }
+
+        .custom-table td {
+            padding: 12px;
+            vertical-align: top;
+        }
+
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+            /* Warna latar belakang baris genap */
+        }
+
+        .custom-table tr:hover {
+            background-color: #e9ecef;
+            /* Warna latar belakang saat hover */
+        }
+
+        .card-header {
+            background-color: #007bff;
+            /* Warna latar belakang header kartu */
+            color: #fff;
+            /* Warna teks header kartu */
+            font-weight: bold;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .card-body {
+            background-color: #ffffff;
+            /* Warna latar belakang kartu */
+            padding: 15px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            /* Jarak antara kartu */
+            border: 1px solid #ddd;
+            /* Border kartu */
+            border-radius: 5px;
+            /* Sudut kartu membulat */
+        }
+
+        .table-bordered td,
+        .table-bordered th {
+            border: 1px solid #dee2e6;
+            /* Warna border tabel */
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.875em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+        }
+
+        .badge-info {
+            background-color: #17a2b8;
+        }
+
         .badge-not-started {
             color: #fff;
             background-color: #ffc107;
@@ -28,7 +106,99 @@
         <div class="page-content">
             <div class="card">
                 <div class="card-body">
-                    <h6> {{ $project->name }} </h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    Detail Pengajuan Proyek : {{ $project->name }}
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-bordered custom-table">
+                                        <tr>
+                                            <th>Deskripsi Sebelumnya</th>
+                                            <td>: </td>
+                                            <td>{{ $project->description_before }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Deskripsi Setelahnya</th>
+                                            <td>: </td>
+                                            <td>{{ $project->description_after }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Pengaju</th>
+                                            <td>: </td>
+                                            <td>{{ $project->user_created->name ?? 'User tidak diketahui' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tanggal Pengajuan</th>
+                                            <td>: </td>
+                                            <td>{{ Carbon::parse($project->created_at)->format('d F Y') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td>: </td>
+                                            <td>
+                                                <span
+                                                    class="badge badge-info">{{ \App\Models\Modul\Project::$statuses[$project->status] }}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    @php
+                                        $filePath = $project->file_path ?? $project->file_path;
+                                        $fileUrl = $filePath ? asset('storage/' . $filePath) : null;
+                                    @endphp
+
+                                    @if ($fileUrl)
+                                        <a href="{{ $fileUrl }}" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-file-earmark-text"></i> Lihat Dokumen
+                                        </a>
+                                    @else
+                                        <p>Tidak ada file yang tersedia.</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    Informasi Validasi
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-bordered custom-table">
+                                        <tr>
+                                            <th>Di Validasi Oleh</th>
+                                            <td>:</td>
+                                            <td>{{ $project->validatedBy->name ?? 'User tidak diketahui' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tanggal Validasi</th>
+                                            <td>:</td>
+                                            <td>{{ Carbon::parse($project->validated_date)->format('d F Y') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status Validasi</th>
+                                            <td>:</td>
+                                            <td>
+                                                <span
+                                                    class="badge badge-success">{{ \App\Models\Modul\Project::$validated[$project->validated] }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Mulai Project</th>
+                                            <td>:</td>
+                                            <td>{{ Carbon::parse($project->start_date)->format('d F Y') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Selesai Project</th>
+                                            <td>:</td>
+                                            <td>{{ Carbon::parse($project->end_date)->format('d F Y') }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-lg-flex align-items-center mb-4 gap-3">
                         {{-- <div class="position-relative">
                             <input type="text" class="form-control ps-5 radius-30" placeholder="Search Order">
