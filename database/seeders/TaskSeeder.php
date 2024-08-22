@@ -13,17 +13,17 @@ class TaskSeeder extends Seeder
      */
     public function run()
     {
-        $project = Project::first(); // Ambil proyek pertama sebagai contoh
+        // $project = Project::first(); // Ambil proyek pertama sebagai contoh
 
-        if ($project) {
-            Task::create([
-                'project_id' => 1, // Sesuaikan dengan ID proyek yang ada
-                'title' => 'Tugas Test',
-                'description' => 'Deskripsi Tugas Test',
-                'status' => Task::STATUS_NOT_STARTED,
-                'start_date' => '2024-07-01',
-                'end_date' => '2024-12-31',
-            ]);
-        }
+        // if ($project) {
+        //     Task::create([
+        //         'project_id' => 1, // Sesuaikan dengan ID proyek yang ada
+        //         'title' => 'Tugas Test',
+        //         'description' => 'Deskripsi Tugas Test',
+        //         'status' => Task::STATUS_NOT_STARTED,
+        //         'start_date' => '2024-07-01',
+        //         'end_date' => '2024-12-31',
+        //     ]);
+        // }
     }
 }
