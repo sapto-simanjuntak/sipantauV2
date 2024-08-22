@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Project $project)
     {
         // $tasks = $project->tasks;  // Ambil semua tugas yang terkait dengan proyek
@@ -114,7 +120,5 @@ class TaskController extends Controller
 
 
 
-    public function addTask()
-    {
-    }
+    public function addTask() {}
 }

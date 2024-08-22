@@ -50,6 +50,11 @@ class DashboardController extends Controller
     //     // return view('pages.modul.project.dashboard', compact('projects', 'taskCount', 'completedTasks', 'inProgressTasks', 'notStartedTasks', 'userProjects'));
     // }
 
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $totalProjects = Project::count();

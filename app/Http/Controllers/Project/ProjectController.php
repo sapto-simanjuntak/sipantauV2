@@ -19,6 +19,13 @@ use App\Models\Modul\Project as ModulProject;
 
 class ProjectController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+
     public function index()
     {
         $users = User::all();
