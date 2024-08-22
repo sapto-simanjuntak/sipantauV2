@@ -21,6 +21,14 @@
     <link href="{{ asset('theme/assets/css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('theme/assets/css/icons.css') }}" rel="stylesheet">
     <title>LOGIN</title>
+    <style>
+        .small-text {
+            font-size: 0.8rem;
+            /* Ukuran font lebih kecil */
+            color: #6c757d;
+            /* Warna teks yang lebih pudar */
+        }
+    </style>
 </head>
 
 <body class="bg-login">
@@ -39,8 +47,9 @@
                                     </div>
                                     <div class="text-center mb-4">
                                         <h5 class="">SI PANTAU</h5>
-                                        <p class="mb-0">Please log in to your account</p>
+                                        <small class="text-muted">Sistem Informasi Pemantauan Project SIMRS</small>
                                     </div>
+
                                     <div class="form-body">
                                         <form class="row g-3" method="POST" action="{{ route('login') }}">
                                             @csrf
