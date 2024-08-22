@@ -38,7 +38,7 @@
                                             alt="" />
                                     </div>
                                     <div class="text-center mb-4">
-                                        <h5 class="">PANTAU</h5>
+                                        <h5 class="">SI PANTAU</h5>
                                         <p class="mb-0">Please log in to your account</p>
                                     </div>
                                     <div class="form-body">
