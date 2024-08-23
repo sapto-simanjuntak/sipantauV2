@@ -9,6 +9,7 @@ use Yajra\DataTables\DataTables;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -106,9 +107,17 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        // Ambil data pengguna berdasarkan ID
+        $user = User::findOrFail($id);
+
+        // Pastikan hanya pengguna yang sesuai dengan ID yang dapat melihat profil mereka sendiri
+        if (Auth::id() !== (int) $id) {
+            return redirect()->route('user.show', ['id' => Auth::id()]);
+        }
+
+        return view('pages.akses.user.profile', compact('user'));
     }
 
     /**
@@ -191,5 +200,31 @@ class UserController extends Controller
         } else {
             return response()->json(['error' => 'Data not found'], 404);
         }
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user(); // Ambil pengguna yang sedang login
+
+        // Validasi input
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed', // Password opsional
+        ]);
+
+        // Update data pengguna
+        $user->name = $validatedData['name'];
+        $user->email = $validatedData['email'];
+
+        // Update password jika ada input password baru
+        if ($request->filled('password')) {
+            $user->password = Hash::make($validatedData['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('user.show', ['user' => $user->id])
+            ->with('success', 'Profile updated successfully.');
     }
 }

@@ -15,7 +15,6 @@
                             <label for="nama">Permission Name</label>
                             <input type="text" class="form-control" id="nama" name="name" placeholder="Nama">
                         </div>
-
                         <div class="form-group mb-3 mt-3">
                             <button type="submit" class="btn btn-primary">Save</button>
                         </div>

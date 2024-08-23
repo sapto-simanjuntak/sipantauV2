@@ -35,25 +35,34 @@
              </a>
          </li>
          <li class="menu-label">Settings</li>
+         @if (Auth::user()->hasAnyRole(['Superadmin', 'Admin']))
+             <li>
+                 <a href="{{ route('user.index') }}">
+                     <div class="parent-icon"><i class='bx bx-user'></i>
+                     </div>
+                     <div class="menu-title">Users</div>
+                 </a>
+             </li>
+             <li>
+                 <a href="{{ route('permission.index') }}">
+                     <div class="parent-icon"><i class='bx bx-user'></i>
+                     </div>
+                     <div class="menu-title">Permission</div>
+                 </a>
+             </li>
+             <li>
+                 <a href="{{ route('role.index') }}">
+                     <div class="parent-icon"><i class='bx bx-user'></i>
+                     </div>
+                     <div class="menu-title">Roles</div>
+                 </a>
+             </li>
+         @endif
          <li>
-             <a href="{{ route('user.index') }}">
+             <a href="{{ route('user.show', Auth::id()) }}">
                  <div class="parent-icon"><i class='bx bx-user'></i>
                  </div>
-                 <div class="menu-title">Users</div>
-             </a>
-         </li>
-         <li>
-             <a href="{{ route('permission.index') }}">
-                 <div class="parent-icon"><i class='bx bx-user'></i>
-                 </div>
-                 <div class="menu-title">Permission</div>
-             </a>
-         </li>
-         <li>
-             <a href="{{ route('role.index') }}">
-                 <div class="parent-icon"><i class='bx bx-user'></i>
-                 </div>
-                 <div class="menu-title">Roles</div>
+                 <div class="menu-title">My Profile</div>
              </a>
          </li>
          <li>
