@@ -20,11 +20,13 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Akses\RoleController;
 use App\Http\Controllers\Akses\UserController;
 use App\Http\Controllers\Project\TaskController;
+use App\Http\Controllers\Support\AjaxController;
 use App\Http\Controllers\Project\CommentController;
 use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Akses\PermissionController;
 use App\Http\Controllers\Project\FormulirController;
 use App\Http\Controllers\Project\DashboardController;
+use App\Http\Controllers\Support\ServiceRequestController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -45,7 +47,7 @@ Route::get('/', function () {
 });
 
 Route::group(
-    ['middleware' => ['auth', 'role:Superadmin|Admin|User|Unit']],
+    ['middleware' => ['auth', 'role:Superadmin|Admin|Teknisi|User']],
     function () {
         Route::resource('data', DataController::class);
         Route::delete('/data/{id}', [DataController::class, 'delete'])->name('data.delete');
@@ -98,6 +100,42 @@ Route::group(
 Route::group(['middleware' => ['role:Superadmin|Admin|Unit|User']], function () {
     Route::get('user/{user}', [UserController::class, 'show'])->name('user.show');
     Route::post('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+});
+
+Route::prefix('service-request')->group(function () {
+    // List & Create
+    Route::get('/', [ServiceRequestController::class, 'index'])->name('service.index');
+    Route::get('/create', [ServiceRequestController::class, 'create'])->name('service.create');
+    Route::post('/', [ServiceRequestController::class, 'store'])->name('service.store');
+    // ✅ Ticket Detail Routes (NO REGEX - accept any format)
+    Route::get('/ticket/{ticket_number}', [ServiceRequestController::class, 'show'])
+        ->name('service.show');
+    Route::get('/ticket/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])
+        ->name('service.edit');
+    Route::put('/ticket/{ticket_number}', [ServiceRequestController::class, 'update'])
+        ->name('service.update');
+    Route::delete('/ticket/{ticket_number}', [ServiceRequestController::class, 'destroy'])
+        ->name('service.destroy');
+    // Admin Actions (AJAX)
+    Route::post('/ticket/{ticket_number}/approve', [ServiceRequestController::class, 'approve'])
+        ->name('service.approve');
+    Route::post('/ticket/{ticket_number}/reject', [ServiceRequestController::class, 'reject'])
+        ->name('service.reject');
+    Route::post('/ticket/{ticket_number}/assign', [ServiceRequestController::class, 'assign'])
+        ->name('service.assign');
+    Route::post('/ticket/{ticket_number}/update-status', [ServiceRequestController::class, 'updateStatus'])
+        ->name('service.updateStatus');
+
+    Route::get('/service-request/ticket/{ticketNumber}/print', [ServiceRequestController::class, 'printTicket'])
+        ->name('service.print');
+});
+
+// AJAX ROUTES
+Route::prefix('ajax')->group(function () {
+    Route::get('/hospital-units', [AjaxController::class, 'getHospitalUnits']);
+    Route::get('/problem-categories', [AjaxController::class, 'getProblemCategories']);
+    Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories']);
+    Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
 });
 
 

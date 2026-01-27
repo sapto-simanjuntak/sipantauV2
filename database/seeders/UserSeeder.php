@@ -18,56 +18,56 @@ class UserSeeder extends Seeder
             'email' => 'fusiana@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('Superadmin');
+        $admin->assignRole('superadmin');
 
         $admin = User::create([
             'name' => 'Yoel',
             'email' => 'yoel@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('Admin');
+        $admin->assignRole('admin');
 
         $admin = User::create([
             'name' => 'Zikri',
             'email' => 'zikri@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('User');
+        $admin->assignRole('teknisi');
 
         $admin = User::create([
             'name' => 'Aldi',
             'email' => 'aldi@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('User');
+        $admin->assignRole('teknisi');
 
         $admin = User::create([
             'name' => 'Asido',
             'email' => 'asido@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('User');
+        $admin->assignRole('teknisi');
 
         $admin = User::create([
             'name' => 'Dudi',
             'email' => 'dudi@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('User');
+        $admin->assignRole('teknisi');
 
         $admin = User::create([
             'name' => 'Marco',
             'email' => 'marco@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('Unit');
+        $admin->assignRole('user');
 
         $admin = User::create([
             'name' => 'Sastroni',
             'email' => 'sastroni@mail.com',
             'password' => bcrypt('12345678')
         ]);
-        $admin->assignRole('Unit');
+        $admin->assignRole('user');
 
 
 

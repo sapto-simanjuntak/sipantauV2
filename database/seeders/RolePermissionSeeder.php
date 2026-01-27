@@ -35,12 +35,12 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'Data-Delete']);
 
 
-        Role::create(['name' => 'Superadmin']);
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'User']);
-        Role::create(['name' => 'Unit']);
+        Role::create(['name' => 'superadmin']);
+        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'teknisi']);
+        Role::create(['name' => 'user']);
 
-        $roleSuperadmin = Role::findByName('Superadmin');
+        $roleSuperadmin = Role::findByName('superadmin');
 
         $roleSuperadmin->givePermissionTo('User-View');
         $roleSuperadmin->givePermissionTo('User-Create');

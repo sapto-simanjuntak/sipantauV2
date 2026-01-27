@@ -19,7 +19,16 @@
                  <div class="menu-title">Dashboard</div>
              </a>
          </li>
-         <li class="menu-label">Master</li>
+         <li class="menu-label">Hardware / Jaringan / Software</li>
+         <li>
+             <a href="{{ route('service.index') }}">
+                 <div class="parent-icon"><i class='bx bx-book'></i>
+                 </div>
+                 <div class="menu-title">Request Perbaikan</div>
+             </a>
+         </li>
+         <li class="menu-label">Pembuatan / Pengembangan Sistem / Data</li>
+
          <li>
              <a href="{{ route('formulir.index') }}">
                  <div class="parent-icon"><i class='bx bx-book'></i>
@@ -35,29 +44,29 @@
              </a>
          </li>
          <li class="menu-label">Settings</li>
-         @if (Auth::user()->hasAnyRole(['Superadmin', 'Admin']))
-             <li>
-                 <a href="{{ route('user.index') }}">
-                     <div class="parent-icon"><i class='bx bx-user'></i>
-                     </div>
-                     <div class="menu-title">Users</div>
-                 </a>
-             </li>
-             <li>
-                 <a href="{{ route('permission.index') }}">
-                     <div class="parent-icon"><i class='bx bx-user'></i>
-                     </div>
-                     <div class="menu-title">Permission</div>
-                 </a>
-             </li>
-             <li>
-                 <a href="{{ route('role.index') }}">
-                     <div class="parent-icon"><i class='bx bx-user'></i>
-                     </div>
-                     <div class="menu-title">Roles</div>
-                 </a>
-             </li>
-         @endif
+
+         <li>
+             <a href="{{ route('user.index') }}">
+                 <div class="parent-icon"><i class='bx bx-user'></i>
+                 </div>
+                 <div class="menu-title">Users</div>
+             </a>
+         </li>
+         <li>
+             <a href="{{ route('permission.index') }}">
+                 <div class="parent-icon"><i class='bx bx-user'></i>
+                 </div>
+                 <div class="menu-title">Permission</div>
+             </a>
+         </li>
+         <li>
+             <a href="{{ route('role.index') }}">
+                 <div class="parent-icon"><i class='bx bx-user'></i>
+                 </div>
+                 <div class="menu-title">Roles</div>
+             </a>
+         </li>
+
          <li>
              <a href="{{ route('user.show', Auth::id()) }}">
                  <div class="parent-icon"><i class='bx bx-user'></i>
