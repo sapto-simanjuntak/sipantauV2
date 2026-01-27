@@ -27,6 +27,7 @@ use App\Http\Controllers\Akses\PermissionController;
 use App\Http\Controllers\Project\FormulirController;
 use App\Http\Controllers\Project\DashboardController;
 use App\Http\Controllers\Support\ServiceRequestController;
+use App\Http\Controllers\Support\SignatureVerificationController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -47,7 +48,7 @@ Route::get('/', function () {
 });
 
 Route::group(
-    ['middleware' => ['auth', 'role:Superadmin|Admin|Teknisi|User']],
+    ['middleware' => ['auth', 'role:superadmin|admin|teknisi|user']],
     function () {
         Route::resource('data', DataController::class);
         Route::delete('/data/{id}', [DataController::class, 'delete'])->name('data.delete');
@@ -60,7 +61,7 @@ Route::group(
 );
 
 Route::group(
-    ['middleware' => ['auth', 'role:Superadmin|Admin|User']],
+    ['middleware' => ['auth', 'role:superadmin|admin|user']],
     function () {
         Route::resource('data', DataController::class);
         Route::delete('/data/{id}', [DataController::class, 'delete'])->name('data.delete');
@@ -78,7 +79,7 @@ Route::group(
 );
 
 Route::group(
-    ['middleware' => ['auth', 'role:Superadmin']],
+    ['middleware' => ['auth', 'role:superadmin']],
     function () {
         Route::resource('permission', PermissionController::class);
         Route::delete('/permission/{id}', [PermissionController::class, 'delete'])->name('permission.delete');
@@ -97,7 +98,7 @@ Route::group(
     }
 );
 
-Route::group(['middleware' => ['role:Superadmin|Admin|Unit|User']], function () {
+Route::group(['middleware' => ['role:superadmin|admin|unit|user']], function () {
     Route::get('user/{user}', [UserController::class, 'show'])->name('user.show');
     Route::post('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 });
@@ -130,6 +131,11 @@ Route::prefix('service-request')->group(function () {
         ->name('service.print');
 });
 
+Route::get('/test-qr', function () {
+    $controller = new \App\Http\Controllers\Support\ServiceRequestController();
+    return $controller->printTicket('TKT-20250127-0001'); // ganti dengan ticket number yang valid
+});
+
 // AJAX ROUTES
 Route::prefix('ajax')->group(function () {
     Route::get('/hospital-units', [AjaxController::class, 'getHospitalUnits']);
@@ -138,44 +144,9 @@ Route::prefix('ajax')->group(function () {
     Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
 });
 
-
-
-
-
-// Auth::routes();
-// Route::resource('permission', PermissionController::class);
-// Route::delete('/permission/{id}', [PermissionController::class, 'delete'])->name('permission.delete');
-// Route::resource('role', RoleController::class);
-// Route::delete('/role/{id}', [RoleController::class, 'delete'])->name('role.delete');
-// Route::resource('user', UserController::class);
-// Route::delete('/user/{id}', [UserController::class, 'delete'])->name('user.delete');
-// Route::get('user/{id}/roles', [App\Http\Controllers\Akses\UserController::class, 'getUserRoles'])->name('user.roles');
-// Route::get('role/{roleId}/give-permissions', [App\Http\Controllers\Akses\RoleController::class, 'addPermissionToRole']);
-// Route::put('role/{roleId}/give-permissions', [App\Http\Controllers\Akses\RoleController::class, 'givePermissionToRole']);
-// Route::get('get-roles', [App\Http\Controllers\Global\SelectController::class, 'selectRoles']);
-// Route::get('get-user', [App\Http\Controllers\Global\SelectController::class, 'selectUser']);
-// Route::get('dokter-autocomplete-search', 'RegistrasiController@selectDokter');
-// Route::resource('projects', ProjectController::class);
-// Route::delete('/projects/{id}', [ProjectController::class, 'delete'])->name('projects.delete');
-// Route::put('/projects/{id}', [ProjectController::class, 'update'])->name('add-pic');
-// Route::post('/projects/{project}/add-pic', [ProjectController::class, 'addPic'])->name('projects.addPic');
-// Route::post('/projects/add-pic', [ProjectController::class, 'addPic'])->name('projects.addPic');
-// Route::post('/projects/delete-pic', [ProjectController::class, 'deletePic'])->name('projects.deletePic');
-// Route::post('/projects/add-validasi', [ProjectController::class, 'addValidasi'])->name('projects.addValidasi');
-// Route::get('project/{id}/give-task', [App\Http\Controllers\Project\ProjectController::class, 'addTask']);
-// Route::get('project/{id}/give-task', [ProjectController::class, 'giveTask'])->name('project.give-task');
-// Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
-// Route::post('register', [AuthController::class, 'register']);
-// Route::resource('projects.tasks', TaskController::class)->shallow();
-// Route::resource('tasks', TaskController::class);
-// Route::resource('comments', CommentController::class);
-// Route::get('project/{id}/give-task', [App\Http\Controllers\Project\ProjectController::class, 'addTask']);
-// Route::post('/projects/add-pic', [ProjectController::class, 'addPic'])->name('projects.addPic');
-// Route::post('/projects/delete-pic', [ProjectController::class, 'deletePic'])->name('projects.deletePic');
-// Route::post('/projects/add-validasi', [ProjectController::class, 'addValidasi'])->name('projects.addValidasi');
-// Route::get('formulir/{id}/view-task', [FormulirController::class, 'giveTask'])->name('formulir.view-task');
-// Route::resource('formulir', FormulirController::class);
-// Route::resource('projects.tasks', TaskController::class)->shallow();
-// Route::delete('/user/{id}', [UserController::class, 'delete'])->name('user.delete');
-// Route::get('project/{id}/give-task', [ProjectController::class, 'giveTask'])->name('project.give-task');
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::prefix('verify')->name('verify.')->group(function () {
+    Route::get('/', [SignatureVerificationController::class, 'index'])->name('index');
+    Route::get('/qr/{data}', [SignatureVerificationController::class, 'verifyFromQr'])->name('qr');
+    Route::post('/manual', [SignatureVerificationController::class, 'verifyManual'])->name('manual');
+    Route::get('/history/{ticketNumber}', [SignatureVerificationController::class, 'history'])->name('history');
+});

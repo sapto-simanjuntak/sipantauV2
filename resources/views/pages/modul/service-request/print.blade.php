@@ -486,6 +486,7 @@
 <body>
     <div class="container">
         {{-- HEADER --}}
+        {{-- HEADER --}}
         <div class="header">
             <div class="header-content">
                 <div class="header-left">
@@ -498,21 +499,25 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <div class="qr-box">
-                        <div class="qr-title">Document Verification</div>
-                        <div class="qr-code-container">
-                            @if (isset($qrCodes['requester']) && $qrCodes['requester'])
-                                <img src="data:image/png;base64,{{ $qrCodes['requester'] }}" alt="QR Code"
-                                    style="width: 100px; height: 100px; display: block; margin: 0 auto;">
-                            @else
-                                <div class="barcode-lines"></div>
-                            @endif
+                    {{-- INFO BOX (ganti QR dengan info summary) --}}
+                    <div style="background: #f8f9fa; border: 2px solid #3498db; border-radius: 8px; padding: 15px;">
+                        <div
+                            style="font-size: 8pt; color: #2c3e50; font-weight: bold; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Document Information
                         </div>
-                        <div class="qr-info">
-                            <div class="qr-ticket-number">{{ $ticket->ticket_number }}</div>
-                            <div class="qr-date">{{ now()->format('d/m/Y H:i') }} WIB</div>
-                            <div class="verification-id">
-                                ID: {{ strtoupper(substr(md5($ticket->ticket_number . $ticket->created_at), 0, 8)) }}
+                        <div style="background: white; padding: 12px; border-radius: 5px;">
+                            <div
+                                style="font-family: 'Courier New', monospace; font-weight: bold; font-size: 11pt; color: #2c3e50; letter-spacing: 1px; text-align: center; margin-bottom: 8px;">
+                                {{ $ticket->ticket_number }}
+                            </div>
+                            <div
+                                style="font-size: 8pt; color: #7f8c8d; text-align: center; padding: 8px 0; border-top: 1px dashed #bdc3c7; border-bottom: 1px dashed #bdc3c7; margin: 8px 0;">
+                                <strong>Generated:</strong><br>
+                                {{ now()->format('d M Y, H:i') }} WIB
+                            </div>
+                            <div style="font-size: 7pt; color: #95a5a6; text-align: center;">
+                                <strong>Doc ID:</strong><br>
+                                {{ strtoupper(substr(md5($ticket->ticket_number . $ticket->created_at), 0, 10)) }}
                             </div>
                         </div>
                     </div>
@@ -809,8 +814,8 @@
             <div class="signature-grid">
 
                 {{-- ========================================
-            SIGNATURE 1: REQUESTER (SELALU ADA)
-        ======================================== --}}
+                        SIGNATURE 1: REQUESTER (SELALU ADA)
+                    ======================================== --}}
                 <div class="signature-cell">
                     <div class="signature-title">REQUESTER</div>
                     <div class="signature-qr">
@@ -829,8 +834,8 @@
                 </div>
 
                 {{-- ========================================
-            SIGNATURE 2: VALIDATOR/ADMIN
-        ======================================== --}}
+                    SIGNATURE 2: VALIDATOR/ADMIN
+                ======================================== --}}
                 <div class="signature-cell">
                     <div class="signature-title">VALIDATOR</div>
                     <div class="signature-qr">
@@ -862,8 +867,8 @@
                 </div>
 
                 {{-- ========================================
-            SIGNATURE 3: TECHNICIAN
-        ======================================== --}}
+                        SIGNATURE 3: TECHNICIAN
+                    ======================================== --}}
                 <div class="signature-cell">
                     <div class="signature-title">TECHNICIAN</div>
                     <div class="signature-qr">

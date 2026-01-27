@@ -13,10 +13,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Modul\ServiceRequest;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Master\ProblemCategory;
-use App\Models\Modul\ServiceRequestLog;
+use Endroid\QrCode\Encoding\Encoding;
 
+use App\Models\Master\ProblemCategory;
+use Endroid\QrCode\RoundBlockSizeMode;
+use App\Models\Modul\ServiceRequestLog;
+use Endroid\QrCode\ErrorCorrectionLevel;
 use Yajra\DataTables\Facades\DataTables;
 
 
@@ -732,7 +736,6 @@ class ServiceRequestController extends Controller
             ], 500);
         }
     }
-
     /**
      * Reject Ticket (AJAX)
      */
@@ -790,7 +793,6 @@ class ServiceRequestController extends Controller
             ], 500);
         }
     }
-
     /**
      * Assign Ticket to Technician (AJAX)
      */
@@ -853,7 +855,6 @@ class ServiceRequestController extends Controller
             ], 500);
         }
     }
-
     /**
      * Update Ticket Status (AJAX)
      */
@@ -921,7 +922,7 @@ class ServiceRequestController extends Controller
             'validator',
             'assignedTechnician',
             'assignedBy',
-            'closedBy' // ✅ Ganti dari closedByUser
+            'closedBy'
         ])->where('ticket_number', $ticketNumber)->firstOrFail();
 
         // Generate QR Codes untuk setiap role
@@ -941,6 +942,276 @@ class ServiceRequestController extends Controller
         ])->setPaper('a4', 'portrait');
 
         return $pdf->stream("Ticket-{$ticketNumber}.pdf");
+    }
+
+    private function generateQrCodes($ticket)
+    {
+        $qrCodes = [];
+
+        try {
+            // ============================================
+            // 1. QR CODE REQUESTER (SELALU ADA)
+            // ============================================
+
+            // ✅ FIX: Convert timestamp ke string yang konsisten
+            $requesterTimestamp = $ticket->created_at->format('Y-m-d H:i:s');
+
+            $requesterData = [
+                'ticket_number' => $ticket->ticket_number,
+                'document_type' => 'service_request_signature',
+                'role' => 'requester',
+                'name' => $ticket->requester_name,
+                'user_id' => $ticket->user_id,
+                'action' => 'created',
+                'timestamp' => $requesterTimestamp,
+                'verification_code' => hash('sha256', 'requester-' . $ticket->ticket_number . $ticket->user_id . $requesterTimestamp),
+            ];
+
+            $encodedRequester = base64_encode(json_encode($requesterData));
+            $requesterVerifyUrl = route('verify.qr', ['data' => $encodedRequester]);
+            $qrCodes['requester'] = $this->createQrCode($requesterVerifyUrl);
+
+            // ============================================
+            // 2. QR CODE VALIDATOR
+            // ============================================
+            if ($ticket->validated_by && $ticket->validated_at) {
+
+                // ✅ FIX: Convert timestamp
+                $validatorTimestamp = $ticket->validated_at->format('Y-m-d H:i:s');
+
+                $validatorData = [
+                    'ticket_number' => $ticket->ticket_number,
+                    'document_type' => 'service_request_signature',
+                    'role' => 'validator',
+                    'name' => optional($ticket->validator)->name,
+                    'user_id' => $ticket->validated_by,
+                    'action' => 'validated',
+                    'status' => $ticket->validation_status,
+                    'timestamp' => $validatorTimestamp,
+                    'verification_code' => hash('sha256', 'validator-' . $ticket->ticket_number . $ticket->validated_by . $validatorTimestamp),
+                ];
+
+                $encodedValidator = base64_encode(json_encode($validatorData));
+                $validatorVerifyUrl = route('verify.qr', ['data' => $encodedValidator]);
+                $qrCodes['validator'] = $this->createQrCode($validatorVerifyUrl);
+            } else {
+                // Placeholder
+                $placeholderData = [
+                    'ticket_number' => $ticket->ticket_number,
+                    'document_type' => 'service_request_signature',
+                    'role' => 'validator',
+                    'status' => 'pending_validation',
+                    'message' => 'Awaiting admin validation',
+                    'created_at' => $ticket->created_at->format('Y-m-d H:i:s')
+                ];
+
+                $encodedPlaceholder = base64_encode(json_encode($placeholderData));
+                $placeholderVerifyUrl = route('verify.qr', ['data' => $encodedPlaceholder]);
+                $qrCodes['validator'] = $this->createQrCode($placeholderVerifyUrl, 'L');
+            }
+
+            // ============================================
+            // 3. QR CODE TECHNICIAN
+            // ============================================
+            if ($ticket->assigned_to) {
+                if (in_array($ticket->ticket_status, ['Resolved', 'Closed'])) {
+
+                    $resolvedAt = $ticket->closed_at ?? $ticket->updated_at;
+
+                    // ✅ FIX: Convert timestamp
+                    $technicianTimestamp = $resolvedAt->format('Y-m-d H:i:s');
+
+                    $technicianData = [
+                        'ticket_number' => $ticket->ticket_number,
+                        'document_type' => 'service_request_signature',
+                        'role' => 'technician',
+                        'name' => optional($ticket->assignedTechnician)->name,
+                        'user_id' => $ticket->assigned_to,
+                        'action' => 'resolved',
+                        'status' => $ticket->ticket_status,
+                        'assigned_at' => $ticket->assigned_at ? $ticket->assigned_at->format('Y-m-d H:i:s') : null,
+                        'resolved_at' => $technicianTimestamp,
+                        'verification_code' => hash('sha256', 'technician-' . $ticket->ticket_number . $ticket->assigned_to . $technicianTimestamp),
+                    ];
+
+                    $encodedTechnician = base64_encode(json_encode($technicianData));
+                    $technicianVerifyUrl = route('verify.qr', ['data' => $encodedTechnician]);
+                    $qrCodes['technician'] = $this->createQrCode($technicianVerifyUrl);
+                } else {
+                    // In progress
+                    $placeholderData = [
+                        'ticket_number' => $ticket->ticket_number,
+                        'document_type' => 'service_request_signature',
+                        'role' => 'technician',
+                        'name' => optional($ticket->assignedTechnician)->name,
+                        'status' => 'in_progress',
+                        'current_status' => $ticket->ticket_status,
+                        'assigned_at' => $ticket->assigned_at ? $ticket->assigned_at->format('Y-m-d H:i:s') : null,
+                        'message' => 'Work in progress by technician'
+                    ];
+
+                    $encodedProgress = base64_encode(json_encode($placeholderData));
+                    $progressVerifyUrl = route('verify.qr', ['data' => $encodedProgress]);
+                    $qrCodes['technician'] = $this->createQrCode($progressVerifyUrl, 'L');
+                }
+            } else {
+                // Unassigned
+                $placeholderData = [
+                    'ticket_number' => $ticket->ticket_number,
+                    'document_type' => 'service_request_signature',
+                    'role' => 'technician',
+                    'status' => 'unassigned',
+                    'message' => 'Awaiting technician assignment',
+                    'created_at' => $ticket->created_at->format('Y-m-d H:i:s')
+                ];
+
+                $encodedUnassigned = base64_encode(json_encode($placeholderData));
+                $unassignedVerifyUrl = route('verify.qr', ['data' => $encodedUnassigned]);
+                $qrCodes['technician'] = $this->createQrCode($unassignedVerifyUrl, 'L');
+            }
+        } catch (\Exception $e) {
+            Log::error('QR Code Generation Failed: ' . $e->getMessage());
+            $qrCodes = [
+                'requester' => null,
+                'validator' => null,
+                'technician' => null
+            ];
+        }
+
+        return $qrCodes;
+    }
+
+    /**
+     * Helper method untuk create QR code
+     */
+    private function createQrCode($data, $errorCorrection = 'H')
+    {
+        try {
+            // Set error correction level
+            $ecLevel = match ($errorCorrection) {
+                'L' => ErrorCorrectionLevel::Low,
+                'M' => ErrorCorrectionLevel::Medium,
+                'Q' => ErrorCorrectionLevel::Quartile,
+                'H' => ErrorCorrectionLevel::High,
+                default => ErrorCorrectionLevel::High
+            };
+
+            // Create QR code
+            $qrCode = QrCode::create($data)
+                ->setEncoding(new Encoding('UTF-8'))
+                ->setErrorCorrectionLevel($ecLevel)
+                ->setSize(300)
+                ->setMargin(10)
+                ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin);
+
+            // Write to PNG
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+
+            // Return base64
+            return base64_encode($result->getString());
+        } catch (\Exception $e) {
+            Log::error('Individual QR Code Creation Failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Calculate SLA Status
+     */
+    private function calculateSLA($ticket)
+    {
+        if (!$ticket->sla_deadline) {
+            return [
+                'class' => 'secondary',
+                'message' => 'No SLA Set'
+            ];
+        }
+
+        $now = now();
+        $deadline = \Carbon\Carbon::parse($ticket->sla_deadline);
+
+        if ($ticket->ticket_status === 'Closed' || $ticket->ticket_status === 'Resolved') {
+            $closedAt = $ticket->closed_at ?? $ticket->updated_at;
+            if ($closedAt <= $deadline) {
+                return [
+                    'class' => 'success',
+                    'message' => 'Met SLA'
+                ];
+            } else {
+                return [
+                    'class' => 'danger',
+                    'message' => 'SLA Breached'
+                ];
+            }
+        }
+
+        $diff = $now->diffInHours($deadline, false);
+
+        if ($diff < 0) {
+            return [
+                'class' => 'danger',
+                'message' => 'Overdue'
+            ];
+        } elseif ($diff < 2) {
+            return [
+                'class' => 'warning',
+                'message' => 'Critical - ' . abs($diff) . 'h remaining'
+            ];
+        } else {
+            return [
+                'class' => 'info',
+                'message' => abs($diff) . 'h remaining'
+            ];
+        }
+    }
+
+    /**
+     * Build Timeline dari logs
+     */
+    private function buildTimeline($ticket)
+    {
+        $timeline = collect();
+
+        // Ticket Created
+        $timeline->push([
+            'title' => 'Ticket Created',
+            'description' => 'Service request dibuat oleh ' . $ticket->requester_name,
+            'timestamp' => $ticket->created_at,
+            'user' => $ticket->user
+        ]);
+
+        // Validation
+        if ($ticket->validated_at) {
+            $timeline->push([
+                'title' => 'Ticket ' . ucfirst($ticket->validation_status),
+                'description' => $ticket->validation_notes ?? 'Ticket telah divalidasi',
+                'timestamp' => $ticket->validated_at,
+                'user' => $ticket->validator
+            ]);
+        }
+
+        // Assignment
+        if ($ticket->assigned_at) {
+            $timeline->push([
+                'title' => 'Ticket Assigned',
+                'description' => 'Ditugaskan ke ' . optional($ticket->assignedTechnician)->name,
+                'timestamp' => $ticket->assigned_at,
+                'user' => $ticket->assignedBy
+            ]);
+        }
+
+        // Closed
+        if ($ticket->closed_at) {
+            $timeline->push([
+                'title' => 'Ticket Closed',
+                'description' => $ticket->closure_notes ?? 'Ticket telah diselesaikan',
+                'timestamp' => $ticket->closed_at,
+                'user' => $ticket->closedBy
+            ]);
+        }
+
+        return $timeline->sortBy('timestamp');
     }
 
     /**
