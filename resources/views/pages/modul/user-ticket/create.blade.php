@@ -355,6 +355,42 @@
             margin: 2px 0 0 0;
         }
 
+        .card-title-simple {
+            margin-bottom: 16px;
+        }
+
+        .card-title-simple h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: var(--text-primary);
+        }
+
+        .card-title-simple p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* UPLOAD TITLE - SIMPLE & CLEAN */
+        .upload-title {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .upload-title h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 4px 0;
+        }
+
+        .upload-title p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
         /* ========================================
            CATEGORY GRID
            ======================================== */
@@ -716,6 +752,11 @@
             text-align: center;
             cursor: pointer;
             transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .camera-upload:active {
@@ -733,6 +774,9 @@
             opacity: 0.4;
             margin-bottom: 10px;
             color: var(--text-muted);
+            display: block;
+            width: 100%;
+            text-align: center;
         }
 
         .camera-upload.has-file i {
@@ -745,6 +789,8 @@
             font-weight: 600;
             margin: 0;
             color: var(--text-primary);
+            width: 100%;
+            text-align: center;
         }
 
         .camera-upload small {
@@ -752,6 +798,8 @@
             color: var(--text-muted);
             display: block;
             margin-top: 4px;
+            width: 100%;
+            text-align: center;
         }
 
         .file-preview {
@@ -1295,7 +1343,7 @@
                                 <i class='bx bx-camera'></i>
                             </div>
                             <div class="card-title">
-                                <h3>Foto (Opsional)</h3>
+                                <h3>Upload Foto (Opsional)</h3>
                                 <p>Screenshot atau foto masalah</p>
                             </div>
                         </div>

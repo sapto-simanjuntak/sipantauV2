@@ -197,7 +197,7 @@
         }
 
         /* ========================================
-           APP BAR
+           APP BAR - IMPROVED WITH USER MENU
            ======================================== */
         .app-bar {
             position: sticky;
@@ -236,6 +236,7 @@
         .app-bar-actions {
             display: flex;
             gap: var(--spacing-sm);
+            align-items: center;
         }
 
         .icon-button {
@@ -274,6 +275,109 @@
             justify-content: center;
             border: 2px solid white;
             color: white;
+        }
+
+        /* USER MENU DROPDOWN */
+        .user-menu {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            background: var(--gradient-cosmic);
+            border: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-avatar:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 220px;
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .user-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .user-dropdown-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .user-dropdown-email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .user-dropdown-menu {
+            padding: var(--spacing-xs);
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .user-dropdown-item.danger {
+            color: var(--accent-danger);
+        }
+
+        .user-dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .user-dropdown-item i {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
         }
 
         /* ========================================
@@ -1083,7 +1187,7 @@
     <div class="page-wrapper">
         <div class="page-content">
 
-            <!-- App Bar -->
+            <!-- App Bar with User Menu -->
             <div class="app-bar">
                 <div class="app-bar-content">
                     <div class="app-bar-title">
@@ -1102,6 +1206,41 @@
                                 <span class="badge" id="notificationBadge" style="display: none;">0</span>
                             @endif
                         </button>
+
+                        <!-- USER MENU -->
+                        <div class="user-menu">
+                            <div class="user-avatar" id="userMenuToggle">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                            </div>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="user-dropdown-header">
+                                    <div class="user-dropdown-name">{{ $user->name }}</div>
+                                    <div class="user-dropdown-email">{{ $user->email ?? 'user@example.com' }}</div>
+                                </div>
+                                <div class="user-dropdown-menu">
+                                    <a href="#" class="user-dropdown-item">
+                                        <i class='bx bx-user'></i>
+                                        <span>Profile</span>
+                                    </a>
+                                    <a href="#" class="user-dropdown-item">
+                                        <i class='bx bx-cog'></i>
+                                        <span>Settings</span>
+                                    </a>
+                                    <div style="height: 1px; background: var(--border-light); margin: 8px 0;"></div>
+                                    <a href="{{ route('logout') }}" class="user-dropdown-item danger"
+                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class='bx bx-log-out'></i>
+                                        <span>Logout</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden Logout Form -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none"
+                            style="display: none;">
+                            @csrf
+                        </form>
                     </div>
                 </div>
             </div>
@@ -1318,6 +1457,26 @@
     <!-- Main Application Script -->
     <script>
         $(function() {
+            // ==========================================
+            // USER MENU DROPDOWN
+            // ==========================================
+            $('#userMenuToggle').on('click', function(e) {
+                e.stopPropagation();
+                $('#userDropdown').toggleClass('active');
+            });
+
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.user-menu').length) {
+                    $('#userDropdown').removeClass('active');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            $('#userDropdown').on('click', function(e) {
+                e.stopPropagation();
+            });
+
             // ==========================================
             // CONFIGURATION & STATE
             // ==========================================
@@ -1635,12 +1794,15 @@
                     $('#searchInput').focus();
                 }
 
-                // ESC to clear search
-                if (e.key === 'Escape' && currentSearch) {
-                    currentSearch = '';
-                    $('#searchInput').val('').blur();
-                    $('#searchBox').removeClass('has-value');
-                    filterAndSearch();
+                // ESC to clear search or close dropdown
+                if (e.key === 'Escape') {
+                    if (currentSearch) {
+                        currentSearch = '';
+                        $('#searchInput').val('').blur();
+                        $('#searchBox').removeClass('has-value');
+                        filterAndSearch();
+                    }
+                    $('#userDropdown').removeClass('active');
                 }
             });
 
@@ -1652,7 +1814,7 @@
             console.log('%c📋 Total Tickets: ' + $('.ticket-card').length, 'font-size: 12px; color: #10b981;');
             console.log('%c\n💡 Keyboard Shortcuts:', 'font-size: 14px; font-weight: bold; color: #f59e0b;');
             console.log('%c   • Ctrl/Cmd + K : Focus Search', 'font-size: 12px; color: #64748b;');
-            console.log('%c   • ESC : Clear Search', 'font-size: 12px; color: #64748b;');
+            console.log('%c   • ESC : Clear Search / Close Menu', 'font-size: 12px; color: #64748b;');
         });
     </script>
 </body>

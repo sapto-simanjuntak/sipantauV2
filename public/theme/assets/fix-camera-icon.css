@@ -1,0 +1,41 @@
+/* SOLUSI SIMPLE - TARUH INI DI CSS LU */
+
+/* Ganti CSS .card yang lama jadi ini */
+.card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    overflow: visible; /* INI YANG PENTING BRO! */
+}
+
+/* Tambahin ini buat card-header biar icon keluar */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    margin-left: -8px; /* BIAR ICON GAK KEPOTONG KIRI */
+    margin-top: -8px; /* BIAR ICON GAK KEPOTONG ATAS */
+    padding-left: 8px;
+    padding-top: 8px;
+}
+
+/* Atau kalo lu mau lebih aman, tambahin ini aja khusus buat icon */
+.card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    color: white;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    position: relative;
+    z-index: 10; /* BIAR DI ATAS SEMUA */
+}
