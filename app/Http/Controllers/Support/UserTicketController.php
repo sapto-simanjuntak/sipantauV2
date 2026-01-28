@@ -2,33 +2,30 @@
 
 namespace App\Http\Controllers\Support;
 
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Modul\ServiceRequest;
+use Illuminate\Support\Facades\Cache;
 
 class UserTicketController extends Controller
 {
     /**
-     * Display mobile-optimized ticket dashboard for regular users
+     * Display mobile-optimized ticket dashboard with pagination
      */
     public function index(Request $request)
     {
         $user = auth()->user();
-
-        // Get filter dari request
         $status = $request->get('status', 'all');
         $search = $request->get('search', '');
 
-        // Build query
+        // ✅ Build query with eager loading
         $query = ServiceRequest::with([
             'hospitalUnit:id,unit_code,unit_name',
             'problemCategory:id,category_name,category_code',
             'problemSubCategory:id,sub_category_name',
-        ])
-            ->where('user_id', $user->id);
+        ])->where('user_id', $user->id);
 
         // Apply status filter
         if ($status !== 'all') {
@@ -39,125 +36,96 @@ class UserTicketController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('ticket_number', 'like', "%{$search}%")
-                    ->orWhere('issue_title', 'like', "%{$search}%");
+                    ->orWhere('issue_title', 'like', "%{$search}%")
+                    ->orWhereHas('hospitalUnit', function ($q) use ($search) {
+                        $q->where('unit_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('problemCategory', function ($q) use ($search) {
+                        $q->where('category_name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        // Get tickets
-        $tickets = $query->orderBy('created_at', 'desc')->get();
+        // ✅ PAGINATION - 20 tickets per page
+        $tickets = $query->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
-        // Calculate statistics
-        $stats = [
-            'active' => ServiceRequest::where('user_id', $user->id)
-                ->whereIn('ticket_status', ['Open', 'Pending', 'Approved', 'Assigned', 'In Progress'])
-                ->count(),
-            'open' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'Open')
-                ->count(),
-            'in_progress' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'In Progress')
-                ->count(),
-            'resolved' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'Resolved')
-                ->count(),
-            'total' => ServiceRequest::where('user_id', $user->id)->count(),
-        ];
+        // ✅ Get stats efficiently with caching
+        $stats = $this->getUserStats($user->id);
 
-        // Get recent activity (last 5 tickets)
-        $recentActivity = ServiceRequest::where('user_id', $user->id)
-            ->orderBy('updated_at', 'desc')
-            ->limit(5)
-            ->get(['ticket_number', 'issue_title', 'ticket_status', 'updated_at']);
-
-        return view('pages.modul.user-ticket.index', compact('tickets', 'stats', 'recentActivity', 'user', 'status', 'search'));
-    }
-
-    /**
-     * AJAX endpoint untuk real-time data
-     */
-    public function getTickets(Request $request)
-    {
-        $user = auth()->user();
-        $status = $request->get('status', 'all');
-
-        $query = ServiceRequest::with([
-            'hospitalUnit:id,unit_code,unit_name',
-            'problemCategory:id,category_name,category_code',
-            'problemSubCategory:id,sub_category_name',
-        ])
-            ->where('user_id', $user->id);
-
-        if ($status !== 'all') {
-            $query->where('ticket_status', $status);
+        // For AJAX requests, return only partial HTML
+        if ($request->ajax() || $request->wantsJson()) {
+            return view('partials.ticket-list', compact('tickets'))->render();
         }
 
-        $tickets = $query->orderBy('created_at', 'desc')->get();
-
-        return response()->json([
-            'success' => true,
-            'tickets' => $tickets
-        ]);
+        return view('pages.modul.user-ticket.index', compact('tickets', 'stats', 'user'));
     }
 
     /**
-     * Get statistics for dashboard
+     * Get user statistics (cached for 5 minutes)
+     */
+    private function getUserStats($userId)
+    {
+        return Cache::remember("user_stats_{$userId}", 300, function () use ($userId) {
+            // ✅ Single query with conditional aggregation
+            $stats = ServiceRequest::selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN ticket_status IN ("Open", "Pending", "Approved", "Assigned", "In Progress") THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN ticket_status = "Open" THEN 1 ELSE 0 END) as open,
+                SUM(CASE WHEN ticket_status = "In Progress" THEN 1 ELSE 0 END) as in_progress,
+                SUM(CASE WHEN ticket_status = "Resolved" THEN 1 ELSE 0 END) as resolved,
+                SUM(CASE WHEN ticket_status = "Closed" THEN 1 ELSE 0 END) as closed
+            ')
+                ->where('user_id', $userId)
+                ->first();
+
+            return [
+                'total' => $stats->total ?? 0,
+                'active' => $stats->active ?? 0,
+                'open' => $stats->open ?? 0,
+                'in_progress' => $stats->in_progress ?? 0,
+                'resolved' => $stats->resolved ?? 0,
+                'closed' => $stats->closed ?? 0,
+            ];
+        });
+    }
+
+    /**
+     * AJAX endpoint for stats (real-time update)
      */
     public function getStats()
     {
         $user = auth()->user();
 
-        $stats = [
-            'active' => ServiceRequest::where('user_id', $user->id)
-                ->whereIn('ticket_status', ['Open', 'Pending', 'Approved', 'Assigned', 'In Progress'])
-                ->count(),
-            'open' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'Open')
-                ->count(),
-            'pending' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'Pending')
-                ->count(),
-            'in_progress' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'In Progress')
-                ->count(),
-            'resolved' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'Resolved')
-                ->count(),
-            'closed' => ServiceRequest::where('user_id', $user->id)
-                ->where('ticket_status', 'Closed')
-                ->count(),
-        ];
+        // Clear cache to get fresh data
+        Cache::forget("user_stats_{$user->id}");
+
+        $stats = $this->getUserStats($user->id);
 
         return response()->json($stats);
     }
 
     /**
-     * Search tickets
+     * AJAX endpoint untuk real-time data (deprecated - use index with AJAX)
+     */
+    public function getTickets(Request $request)
+    {
+        return $this->index($request);
+    }
+
+    /**
+     * Search tickets (deprecated - use index with search param)
      */
     public function search(Request $request)
     {
-        $user = auth()->user();
-        $keyword = $request->get('q', '');
-
-        $tickets = ServiceRequest::with([
-            'hospitalUnit:id,unit_code,unit_name',
-            'problemCategory:id,category_name,category_code',
-        ])
-            ->where('user_id', $user->id)
-            ->where(function ($query) use ($keyword) {
-                $query->where('ticket_number', 'like', "%{$keyword}%")
-                    ->orWhere('issue_title', 'like', "%{$keyword}%")
-                    ->orWhere('issue_description', 'like', "%{$keyword}%");
-            })
-            ->orderBy('created_at', 'desc')
-            ->limit(20)
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'tickets' => $tickets
-        ]);
+        $request->merge(['search' => $request->get('q', '')]);
+        return $this->index($request);
     }
 
+    // ========================================
+    // KEEP EXISTING SHOW METHOD
+    // ========================================
     public function show($ticket_number)
     {
         try {
@@ -176,15 +144,11 @@ class UserTicketController extends Controller
                 'logs.user:id,name'
             ])->where('ticket_number', $ticket_number)->firstOrFail();
 
-            // ✅ Get technicians using Spatie role() method
-            $technicians = User::role('teknisi') // ← Pakai role name yang lo set
+            $technicians = User::role('teknisi')
                 ->select('id', 'name', 'email')
                 ->get();
 
-            // Calculate SLA status
             $slaStatus = $this->calculateSLAStatus($ticket);
-
-            // Get activity timeline
             $timeline = $this->getTicketTimeline($ticket);
 
             return view('pages.modul.user-ticket.show', compact(
@@ -239,14 +203,10 @@ class UserTicketController extends Controller
         }
     }
 
-    /**
-     * Get Ticket Timeline/Activity Log
-     */
     private function getTicketTimeline($ticket)
     {
         $timeline = [];
 
-        // Created
         $timeline[] = [
             'icon' => 'bx-plus-circle',
             'color' => 'primary',
@@ -256,7 +216,6 @@ class UserTicketController extends Controller
             'user' => $ticket->user
         ];
 
-        // Validated
         if ($ticket->validated_at) {
             $timeline[] = [
                 'icon' => $ticket->validation_status === 'approved' ? 'bx-check-circle' : 'bx-x-circle',
@@ -268,7 +227,6 @@ class UserTicketController extends Controller
             ];
         }
 
-        // Assigned
         if ($ticket->assigned_at) {
             $timeline[] = [
                 'icon' => 'bx-user-check',
@@ -280,7 +238,6 @@ class UserTicketController extends Controller
             ];
         }
 
-        // Closed
         if ($ticket->closed_at) {
             $timeline[] = [
                 'icon' => 'bx-check-double',
@@ -292,7 +249,6 @@ class UserTicketController extends Controller
             ];
         }
 
-        // Add logs
         foreach ($ticket->logs as $log) {
             $timeline[] = [
                 'icon' => 'bx-message-square-detail',
@@ -304,7 +260,6 @@ class UserTicketController extends Controller
             ];
         }
 
-        // Sort by timestamp desc
         usort($timeline, function ($a, $b) {
             return $b['timestamp'] <=> $a['timestamp'];
         });

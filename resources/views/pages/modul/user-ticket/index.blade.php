@@ -1329,112 +1329,11 @@
             <div class="tickets-container">
                 <div class="section-header">
                     <h3 class="section-title">Daftar Tiket</h3>
-                    <span class="section-count" id="ticketCount">{{ $tickets->count() }} tiket</span>
+                    <span class="section-count" id="ticketCount">{{ $tickets->total() }} tiket</span>
                 </div>
 
                 <div class="tickets-list" id="ticketsList">
-                    @forelse($tickets as $ticket)
-                        <div class="ticket-card {{ $ticket->sla_deadline && now()->gt($ticket->sla_deadline) ? 'has-sla-warning' : '' }}"
-                            data-id="{{ $ticket->id }}" data-status="{{ $ticket->ticket_status }}"
-                            data-priority="{{ $ticket->priority }}"
-                            data-search="{{ strtolower($ticket->ticket_number . ' ' . $ticket->issue_title . ' ' . ($ticket->hospitalUnit ? $ticket->hospitalUnit->unit_name : '') . ' ' . ($ticket->problemCategory ? $ticket->problemCategory->category_name : '')) }}">
-
-                            <!-- Ticket Header -->
-                            <div class="ticket-header">
-                                <div class="ticket-number">
-                                    <span class="ticket-id">#{{ $ticket->ticket_number }}</span>
-                                    <span class="ticket-date">
-                                        <i class='bx bx-calendar'></i>
-                                        {{ $ticket->created_at->format('d M Y, H:i') }}
-                                    </span>
-                                </div>
-                                <span
-                                    class="status-badge status-{{ strtolower(str_replace(' ', '-', $ticket->ticket_status)) }}">
-                                    {{ $ticket->ticket_status }}
-                                </span>
-                            </div>
-
-                            <!-- Ticket Body -->
-                            <div class="ticket-body">
-                                <h4 class="ticket-title">{{ $ticket->issue_title }}</h4>
-
-                                <div class="ticket-meta">
-                                    @if ($ticket->hospitalUnit)
-                                        <span class="meta-chip">
-                                            <i class='bx bx-building'></i>
-                                            {{ $ticket->hospitalUnit->unit_name }}
-                                        </span>
-                                    @endif
-
-                                    @if ($ticket->problemCategory)
-                                        <span class="meta-chip">
-                                            <i class='bx bx-category'></i>
-                                            {{ $ticket->problemCategory->category_name }}
-                                        </span>
-                                    @endif
-
-                                    <span class="priority-badge priority-{{ strtolower($ticket->priority) }}">
-                                        {{ $ticket->priority }}
-                                    </span>
-                                </div>
-
-                                @if ($ticket->sla_deadline)
-                                    @php
-                                        $deadline = \Carbon\Carbon::parse($ticket->sla_deadline);
-                                        $hoursRemaining = now()->diffInHours($deadline, false);
-                                    @endphp
-                                    @if ($hoursRemaining < 0)
-                                        <div class="sla-alert">
-                                            <i class='bx bx-error-circle'></i>
-                                            <span>⚠️ Overdue {{ abs(round($hoursRemaining)) }} jam yang lalu</span>
-                                        </div>
-                                    @elseif($hoursRemaining <= 4)
-                                        <div class="sla-alert warning">
-                                            <i class='bx bx-time-five'></i>
-                                            <span>⏰ {{ round($hoursRemaining) }} jam tersisa</span>
-                                        </div>
-                                    @endif
-                                @endif
-                            </div>
-
-                            <!-- Ticket Actions -->
-                            <div class="ticket-actions">
-                                <a href="{{ route('ticket.show', $ticket->ticket_number) }}"
-                                    class="action-button action-primary">
-                                    <i class='bx bx-show'></i>
-                                    Detail
-                                </a>
-
-                                @if (in_array($ticket->ticket_status, ['Open', 'Pending']))
-                                    <a href="{{ route('service.edit', $ticket->ticket_number) }}"
-                                        class="action-button action-secondary">
-                                        <i class='bx bx-edit'></i>
-                                        Edit
-                                    </a>
-
-                                    <button class="action-button action-danger delete-ticket"
-                                        data-id="{{ $ticket->id }}" data-ticket="{{ $ticket->ticket_number }}">
-                                        <i class='bx bx-trash'></i>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @empty
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <i class='bx bx-inbox'></i>
-                            </div>
-                            <h3 class="empty-title">Belum Ada Tiket</h3>
-                            <p class="empty-description">
-                                Anda belum memiliki tiket service request. Buat tiket baru untuk melaporkan masalah
-                                teknis.
-                            </p>
-                            <a href="{{ route('service.create') }}" class="empty-action">
-                                <i class='bx bx-plus-circle'></i>
-                                Buat Tiket Pertama
-                            </a>
-                        </div>
-                    @endforelse
+                    @include('partials.ticket-list', ['tickets' => $tickets])
                 </div>
             </div>
 
@@ -1458,6 +1357,21 @@
     <script>
         $(function() {
             // ==========================================
+            // CONFIGURATION
+            // ==========================================
+            const CONFIG = {
+                debounceTime: 500,
+                animationDuration: 300,
+                statsRefreshInterval: 30000,
+            };
+
+            let searchTimeout;
+            let currentPage = 1;
+            let currentStatus = 'all';
+            let currentSearch = '';
+            let isLoading = false;
+
+            // ==========================================
             // USER MENU DROPDOWN
             // ==========================================
             $('#userMenuToggle').on('click', function(e) {
@@ -1465,104 +1379,97 @@
                 $('#userDropdown').toggleClass('active');
             });
 
-            // Close dropdown when clicking outside
             $(document).on('click', function(e) {
                 if (!$(e.target).closest('.user-menu').length) {
                     $('#userDropdown').removeClass('active');
                 }
             });
 
-            // Prevent dropdown from closing when clicking inside
             $('#userDropdown').on('click', function(e) {
                 e.stopPropagation();
             });
 
             // ==========================================
-            // CONFIGURATION & STATE
-            // ==========================================
-            let currentFilter = 'all';
-            let currentSearch = '';
-
-            // ==========================================
-            // FILTER TABS
+            // FILTER TABS - SERVER-SIDE
             // ==========================================
             $('.filter-tab').on('click', function() {
-                const status = $(this).data('status');
-                currentFilter = status;
+                if (isLoading) return;
 
-                // Update active state
+                const status = $(this).data('status');
+                currentStatus = status;
+                currentPage = 1;
+
                 $('.filter-tab').removeClass('active');
                 $(this).addClass('active');
 
-                // Filter tickets
-                filterAndSearch();
+                fetchTickets();
             });
 
             // ==========================================
-            // SEARCH FUNCTIONALITY
+            // SEARCH - SERVER-SIDE WITH DEBOUNCE
             // ==========================================
-            let searchTimeout;
             $('#searchInput').on('input', function() {
                 const keyword = $(this).val();
                 $('#searchBox').toggleClass('has-value', keyword.length > 0);
 
-                // Debounce search
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    currentSearch = keyword.toLowerCase();
-                    filterAndSearch();
-                }, 300);
+                    currentSearch = keyword;
+                    currentPage = 1;
+                    fetchTickets();
+                }, CONFIG.debounceTime);
             });
 
             $('#searchClear').on('click', function() {
                 currentSearch = '';
                 $('#searchInput').val('');
                 $('#searchBox').removeClass('has-value');
-                filterAndSearch();
+                currentPage = 1;
+                fetchTickets();
                 $('#searchInput').focus();
             });
 
             // ==========================================
-            // COMBINED FILTER & SEARCH
+            // FETCH TICKETS VIA AJAX
             // ==========================================
-            function filterAndSearch() {
-                let visibleCount = 0;
+            function fetchTickets() {
+                if (isLoading) return;
 
-                $('.ticket-card').each(function() {
-                    const $card = $(this);
-                    const ticketStatus = $card.data('status');
-                    const searchData = $card.data('search');
+                isLoading = true;
+                showLoadingState();
 
-                    // Check filter
-                    const matchesFilter = currentFilter === 'all' || ticketStatus === currentFilter;
+                const params = {
+                    status: currentStatus,
+                    search: currentSearch,
+                    page: currentPage
+                };
 
-                    // Check search
-                    const matchesSearch = currentSearch === '' || searchData.includes(currentSearch);
+                $.ajax({
+                    url: '/ticket-user',
+                    method: 'GET',
+                    data: params,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(html) {
+                        isLoading = false;
+                        $('#ticketsList').fadeOut(200, function() {
+                            $(this).html(html).fadeIn(CONFIG.animationDuration);
+                            updateTicketCount();
+                        });
+                    },
+                    error: function(xhr) {
+                        isLoading = false;
+                        console.error('Failed to fetch tickets:', xhr);
 
-                    // Show/hide card
-                    if (matchesFilter && matchesSearch) {
-                        $card.show();
-                        visibleCount++;
-                    } else {
-                        $card.hide();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Memuat Tiket',
+                            text: 'Terjadi kesalahan saat memuat data. Silakan refresh halaman.',
+                            confirmButtonColor: 'var(--accent-primary)'
+                        });
                     }
                 });
-
-                // Update count
-                $('#ticketCount').text(visibleCount + ' tiket');
-
-                // Show/hide empty state
-                if (visibleCount === 0) {
-                    let message = 'Tidak ada tiket';
-                    if (currentSearch) {
-                        message = `Tidak ditemukan tiket dengan kata kunci "${currentSearch}"`;
-                    } else if (currentFilter !== 'all') {
-                        message = `Tidak ada tiket dengan status "${currentFilter}"`;
-                    }
-                    showEmptyState(message);
-                } else {
-                    hideEmptyState();
-                }
             }
 
             // ==========================================
@@ -1570,13 +1477,12 @@
             // ==========================================
             $(document).on('click', '.delete-ticket', function() {
                 const ticketNumber = $(this).data('ticket');
-                const ticketId = $(this).data('id');
                 const ticketCard = $(this).closest('.ticket-card');
 
                 Swal.fire({
                     title: 'Hapus Tiket?',
                     html: `<p>Tiket <strong style="color: var(--accent-primary);">${ticketNumber}</strong> akan dihapus permanen.</p>
-                           <p style="color: var(--text-muted); font-size: 14px;">Tindakan ini tidak dapat dibatalkan.</p>`,
+                   <p style="color: var(--text-muted); font-size: 14px;">Tindakan ini tidak dapat dibatalkan.</p>`,
                     icon: 'warning',
                     iconColor: 'var(--accent-danger)',
                     showCancelButton: true,
@@ -1596,7 +1502,6 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             },
                             success: function(response) {
-                                // Animate removal
                                 ticketCard.css({
                                     'transform': 'translateX(-100%)',
                                     'opacity': '0',
@@ -1605,14 +1510,9 @@
 
                                 setTimeout(function() {
                                     ticketCard.remove();
+                                    refreshStats();
+                                    updateTicketCount();
 
-                                    // Update stats
-                                    updateStats();
-
-                                    // Update count
-                                    filterAndSearch();
-
-                                    // Show success
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Terhapus!',
@@ -1623,9 +1523,8 @@
                                         showConfirmButton: false
                                     });
 
-                                    // Check if empty
                                     if ($('.ticket-card').length === 0) {
-                                        showEmptyState('Belum Ada Tiket');
+                                        fetchTickets();
                                     }
                                 }, 300);
                             },
@@ -1633,7 +1532,8 @@
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Gagal!',
-                                    text: 'Gagal menghapus tiket',
+                                    text: xhr.responseJSON?.message ||
+                                        'Gagal menghapus tiket',
                                     iconColor: 'var(--accent-danger)',
                                     confirmButtonColor: 'var(--accent-primary)'
                                 });
@@ -1644,24 +1544,27 @@
             });
 
             // ==========================================
-            // UPDATE STATISTICS WITH ANIMATION
+            // REFRESH STATS VIA AJAX
             // ==========================================
-            function updateStats() {
-                $.get('/user-ticket/stats', function(data) {
+            function refreshStats() {
+                $.get('/stats', function(data) {
                     animateNumber('#statActive', data.active);
                     animateNumber('#statOpen', data.open);
                     animateNumber('#statInProgress', data.in_progress);
                     animateNumber('#statResolved', data.resolved);
 
-                    // Update badge
                     const badge = $('#notificationBadge');
                     if (data.active > 0) {
                         badge.text(data.active).show();
                     } else {
                         badge.hide();
                     }
+                }).fail(function() {
+                    console.warn('Failed to refresh stats');
                 });
             }
+
+            setInterval(refreshStats, CONFIG.statsRefreshInterval);
 
             function animateNumber(selector, targetNumber) {
                 const $element = $(selector);
@@ -1689,74 +1592,58 @@
             }
 
             // ==========================================
-            // EMPTY STATE HELPERS
+            // HELPER FUNCTIONS
             // ==========================================
-            function showEmptyState(message) {
-                if ($('.empty-state-dynamic').length === 0) {
-                    const isSearch = currentSearch.length > 0;
-                    const isFilter = currentFilter !== 'all';
-
-                    let actionBtn = '';
-                    if (isSearch) {
-                        actionBtn = `
-                            <button class="empty-action" id="clearSearchBtn" style="background: var(--gradient-primary);">
-                                <i class='bx bx-x-circle'></i>
-                                Hapus Pencarian
-                            </button>
-                        `;
-                    } else if (isFilter) {
-                        actionBtn = `
-                            <button class="empty-action" id="clearFilterBtn" style="background: var(--gradient-primary);">
-                                <i class='bx bx-grid-alt'></i>
-                                Lihat Semua Tiket
-                            </button>
-                        `;
-                    }
-
-                    $('#ticketsList').append(`
-                        <div class="empty-state empty-state-dynamic" style="animation: fadeIn 0.5s ease;">
-                            <div class="empty-icon">
-                                <i class='bx ${isSearch ? 'bx-search-alt' : 'bx-filter-alt'}'></i>
-                            </div>
-                            <h3 class="empty-title">${message}</h3>
-                            <p class="empty-description">Coba filter atau kata kunci lain</p>
-                            ${actionBtn}
-                        </div>
-                    `);
-                }
+            function updateTicketCount() {
+                const count = $('.ticket-card').length;
+                $('#ticketCount').text(count + ' tiket');
             }
 
-            function hideEmptyState() {
-                $('.empty-state-dynamic').remove();
+            function showLoadingState() {
+                $('#ticketsList').html(`
+            <div class="loading-state" style="text-align: center; padding: 60px 20px;">
+                <div style="width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--border-light); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p style="color: var(--text-muted); font-size: 14px;">Memuat tiket...</p>
+            </div>
+        `);
             }
 
-            // Clear search button
-            $(document).on('click', '#clearSearchBtn', function() {
+            window.resetFilters = function() {
                 currentSearch = '';
+                currentStatus = 'all';
+                currentPage = 1;
+
                 $('#searchInput').val('');
                 $('#searchBox').removeClass('has-value');
-                filterAndSearch();
-            });
-
-            // Clear filter button
-            $(document).on('click', '#clearFilterBtn', function() {
-                currentFilter = 'all';
                 $('.filter-tab').removeClass('active');
                 $('.filter-tab[data-status="all"]').addClass('active');
-                filterAndSearch();
+
+                fetchTickets();
+            };
+
+            // ==========================================
+            // KEYBOARD SHORTCUTS
+            // ==========================================
+            $(document).on('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    $('#searchInput').focus();
+                }
+
+                if (e.key === 'Escape') {
+                    if (currentSearch) {
+                        currentSearch = '';
+                        $('#searchInput').val('').blur();
+                        $('#searchBox').removeClass('has-value');
+                        currentPage = 1;
+                        fetchTickets();
+                    }
+                    $('#userDropdown').removeClass('active');
+                }
             });
 
             // ==========================================
-            // CARD ANIMATIONS
-            // ==========================================
-            $('.ticket-card').each(function(index) {
-                $(this).css({
-                    'animation': `slideIn 0.4s ease-out ${index * 0.05}s both`
-                });
-            });
-
-            // ==========================================
-            // PULL TO REFRESH
+            // PULL TO REFRESH (MOBILE)
             // ==========================================
             let startY = 0;
             let pulling = false;
@@ -1770,7 +1657,6 @@
 
             $(window).on('touchmove', function(e) {
                 if (!pulling) return;
-
                 const currentY = e.touches[0].pageY;
                 const distance = currentY - startY;
 
@@ -1785,36 +1671,11 @@
             });
 
             // ==========================================
-            // KEYBOARD SHORTCUTS
+            // INITIALIZATION
             // ==========================================
-            $(document).on('keydown', function(e) {
-                // Ctrl/Cmd + K to focus search
-                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                    e.preventDefault();
-                    $('#searchInput').focus();
-                }
-
-                // ESC to clear search or close dropdown
-                if (e.key === 'Escape') {
-                    if (currentSearch) {
-                        currentSearch = '';
-                        $('#searchInput').val('').blur();
-                        $('#searchBox').removeClass('has-value');
-                        filterAndSearch();
-                    }
-                    $('#userDropdown').removeClass('active');
-                }
-            });
-
-            // ==========================================
-            // INITIALIZATION LOG
-            // ==========================================
-            console.log('%c🎫 Ticket Management System', 'font-size: 20px; font-weight: bold; color: #0ea5e9;');
-            console.log('%c✨ Clean, Powerful & Modern', 'font-size: 14px; color: #8b5cf6;');
-            console.log('%c📋 Total Tickets: ' + $('.ticket-card').length, 'font-size: 12px; color: #10b981;');
-            console.log('%c\n💡 Keyboard Shortcuts:', 'font-size: 14px; font-weight: bold; color: #f59e0b;');
-            console.log('%c   • Ctrl/Cmd + K : Focus Search', 'font-size: 12px; color: #64748b;');
-            console.log('%c   • ESC : Clear Search / Close Menu', 'font-size: 12px; color: #64748b;');
+            console.log('%c🎫 Ticket Management - Optimized',
+                'font-size: 18px; font-weight: bold; color: #0ea5e9;');
+            console.log('%c✨ Pagination • AJAX • Caching', 'font-size: 12px; color: #8b5cf6;');
         });
     </script>
 </body>
