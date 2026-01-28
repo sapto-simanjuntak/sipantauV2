@@ -39,8 +39,8 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0e27;
-            color: #ffffff;
+            background: #f8fafc;
+            color: #0f172a;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -50,30 +50,32 @@
            CSS VARIABLES
            ======================================== */
         :root {
-            --primary: #00d4ff;
-            --primary-dark: #00a8cc;
-            --secondary: #7c3aed;
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #8b5cf6;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
 
-            --bg-dark: #0a0e27;
-            --bg-card: #151932;
-            --bg-input: rgba(21, 25, 50, 0.6);
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
 
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --text-muted: #64748b;
 
-            --border-color: rgba(148, 163, 184, 0.1);
+            --border-color: #e2e8f0;
+            --border-medium: #cbd5e1;
 
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-full: 9999px;
 
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.3);
 
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -85,7 +87,7 @@
             position: fixed;
             inset: 0;
             z-index: 0;
-            background: radial-gradient(ellipse at top, #1e293b 0%, #0a0e27 50%);
+            background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 50%, #fae8ff 100%);
             pointer-events: none;
         }
 
@@ -94,8 +96,8 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
+                radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
             animation: float 20s ease-in-out infinite;
         }
 
@@ -129,10 +131,11 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10, 14, 39, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
             padding: 14px 16px;
+            box-shadow: var(--shadow);
         }
 
         .app-bar-content {
@@ -148,7 +151,7 @@
             height: 36px;
             border-radius: var(--radius-full);
             background: var(--bg-input);
-            border: none;
+            border: 2px solid var(--border-color);
             color: var(--text-primary);
             display: flex;
             align-items: center;
@@ -160,7 +163,8 @@
 
         .back-btn:active {
             transform: scale(0.92);
-            background: rgba(148, 163, 184, 0.2);
+            background: var(--border-medium);
+            border-color: var(--primary);
         }
 
         .app-title {
@@ -172,6 +176,7 @@
             font-weight: 700;
             margin: 0;
             line-height: 1.2;
+            color: var(--text-primary);
         }
 
         .app-title p {
@@ -197,11 +202,11 @@
            ======================================== */
         .progress-card {
             background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: 16px;
             margin-bottom: 20px;
+            box-shadow: var(--shadow);
         }
 
         .progress-dots {
@@ -218,7 +223,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: rgba(148, 163, 184, 0.15);
+            background: var(--border-medium);
             z-index: 0;
         }
 
@@ -236,8 +241,8 @@
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            background: var(--bg-dark);
-            border: 2px solid rgba(148, 163, 184, 0.3);
+            background: white;
+            border: 2px solid var(--border-medium);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -246,17 +251,20 @@
             position: relative;
             z-index: 2;
             transition: var(--transition);
+            color: var(--text-muted);
         }
 
         .progress-dot.active {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-color: transparent;
             box-shadow: var(--shadow-glow);
+            color: white;
         }
 
         .progress-dot.done {
             background: var(--success);
             border-color: transparent;
+            color: white;
         }
 
         .progress-labels {
@@ -269,7 +277,7 @@
         .progress-label {
             font-size: 10px;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* ========================================
@@ -301,11 +309,11 @@
            ======================================== */
         .card {
             background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: 16px;
             margin-bottom: 14px;
+            box-shadow: var(--shadow);
         }
 
         .card-header {
@@ -325,6 +333,8 @@
             justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
         .card-title {
@@ -336,6 +346,7 @@
             font-weight: 700;
             margin: 0;
             line-height: 1.3;
+            color: var(--text-primary);
         }
 
         .card-title p {
@@ -380,11 +391,12 @@
 
         .category-item.selected {
             border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.25);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.25);
+            background: white;
         }
 
         .category-item.selected::before {
-            opacity: 0.08;
+            opacity: 0.05;
         }
 
         .category-icon {
@@ -398,39 +410,48 @@
             font-size: 24px;
             position: relative;
             z-index: 1;
+            color: white;
         }
 
         /* Category Colors */
         .cat-hw {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .cat-sw {
             background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
         .cat-net {
             background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
         .cat-pabx {
             background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .cat-cctv {
             background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .cat-ac {
             background: linear-gradient(135deg, #06b6d4, #0891b2);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .cat-dev {
             background: linear-gradient(135deg, #ec4899, #db2777);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
         }
 
         .cat-email {
             background: linear-gradient(135deg, #6366f1, #4f46e5);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .category-name {
@@ -438,6 +459,7 @@
             font-weight: 600;
             position: relative;
             z-index: 1;
+            color: var(--text-primary);
         }
 
         .category-desc {
@@ -475,9 +497,10 @@
         }
 
         .chip.selected {
-            background: rgba(0, 212, 255, 0.12);
+            background: white;
             border-color: var(--primary);
-            color: var(--text-primary);
+            color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
 
         /* ========================================
@@ -507,6 +530,7 @@
             font-size: 14px;
             font-family: 'Inter', sans-serif;
             transition: var(--transition);
+            font-weight: 500;
         }
 
         .form-input:focus,
@@ -514,7 +538,8 @@
         .form-textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
+            background: white;
         }
 
         .form-input::placeholder,
@@ -529,7 +554,7 @@
 
         .form-select {
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 14px center;
             padding-right: 40px;
@@ -567,7 +592,9 @@
 
         .severity-item.selected {
             border-color: currentColor;
-            background: rgba(255, 255, 255, 0.04);
+            background: white;
+            box-shadow: 0 0 0 3px currentColor;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .severity-emoji {
@@ -644,13 +671,14 @@
         .toggle-label {
             font-size: 13px;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .toggle-switch {
             position: relative;
             width: 48px;
             height: 28px;
-            background: rgba(148, 163, 184, 0.2);
+            background: var(--border-medium);
             border-radius: 14px;
             transition: var(--transition);
         }
@@ -669,6 +697,7 @@
             background: white;
             border-radius: 50%;
             transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .toggle-card.active .toggle-switch::before {
@@ -682,7 +711,7 @@
             width: 100%;
             padding: 42px 16px;
             background: var(--bg-input);
-            border: 2px dashed var(--border-color);
+            border: 2px dashed var(--border-medium);
             border-radius: var(--radius-md);
             text-align: center;
             cursor: pointer;
@@ -703,6 +732,7 @@
             font-size: 42px;
             opacity: 0.4;
             margin-bottom: 10px;
+            color: var(--text-muted);
         }
 
         .camera-upload.has-file i {
@@ -714,6 +744,7 @@
             font-size: 13px;
             font-weight: 600;
             margin: 0;
+            color: var(--text-primary);
         }
 
         .camera-upload small {
@@ -745,10 +776,12 @@
             align-items: center;
             gap: 10px;
             padding: 11px;
-            background: var(--bg-card);
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
             margin-top: 10px;
             font-size: 12px;
+            color: var(--text-primary);
         }
 
         .file-info button {
@@ -770,6 +803,7 @@
            ======================================== */
         .summary-group {
             background: var(--bg-input);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
             padding: 14px;
             margin-bottom: 12px;
@@ -790,7 +824,7 @@
             justify-content: space-between;
             padding: 7px 0;
             font-size: 12px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .summary-row:last-child {
@@ -799,6 +833,7 @@
 
         .summary-label {
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .summary-value {
@@ -824,8 +859,8 @@
 
         .alert-warning {
             background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            color: #d97706;
         }
 
         .alert i {
@@ -843,10 +878,11 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(10, 14, 39, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px) saturate(180%);
-            border-top: 1px solid var(--border-color);
+            border-top: 2px solid var(--border-color);
             padding: 14px 16px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .bottom-bar-content {
@@ -881,18 +917,24 @@
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            box-shadow: 0 4px 14px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
         }
 
         .btn-secondary {
-            background: var(--bg-input);
+            background: white;
             color: var(--text-primary);
-            border: 2px solid var(--border-color);
+            border: 2px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-input);
+            border-color: var(--primary);
         }
 
         .btn-success {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         }
 
         .btn-block {
@@ -905,7 +947,7 @@
         .loading-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(10, 14, 39, 0.92);
+            background: rgba(248, 250, 252, 0.95);
             backdrop-filter: blur(8px);
             z-index: 999;
             display: none;
@@ -920,7 +962,7 @@
         .spinner {
             width: 44px;
             height: 44px;
-            border: 4px solid rgba(148, 163, 184, 0.2);
+            border: 4px solid var(--border-medium);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
@@ -962,8 +1004,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.3);
+            background: var(--border-medium);
             border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
         }
     </style>
 </head>
@@ -1442,8 +1488,8 @@
                     icon: 'error',
                     title: 'File Terlalu Besar',
                     text: 'Max 5MB',
-                    background: '#1e2339',
-                    color: '#fff'
+                    background: '#fff',
+                    color: '#0f172a'
                 });
                 input.value = '';
                 return;
@@ -1528,8 +1574,8 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Pilih Kategori',
-                    background: '#1e2339',
-                    color: '#fff'
+                    background: '#fff',
+                    color: '#0f172a'
                 });
                 return false;
             }
@@ -1538,8 +1584,8 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Judul Kosong',
-                        background: '#1e2339',
-                        color: '#fff'
+                        background: '#fff',
+                        color: '#0f172a'
                     });
                     return false;
                 }
@@ -1547,8 +1593,8 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Lengkapi Data',
-                        background: '#1e2339',
-                        color: '#fff'
+                        background: '#fff',
+                        color: '#0f172a'
                     });
                     return false;
                 }
@@ -1559,8 +1605,8 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Lengkapi Lokasi',
-                        background: '#1e2339',
-                        color: '#fff'
+                        background: '#fff',
+                        color: '#0f172a'
                     });
                     return false;
                 }
@@ -1611,13 +1657,13 @@
                         icon: 'success',
                         title: 'Berhasil!',
                         html: `<p>Tiket berhasil dibuat</p>
-                            <div style="padding:14px;background:rgba(0,212,255,0.1);border-radius:12px;margin-top:14px;">
-                                <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">No. Tiket</div>
-                                <div style="font-size:17px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#00d4ff;">${res.ticket_number}</div>
+                            <div style="padding:14px;background:rgba(14,165,233,0.1);border-radius:12px;margin-top:14px;">
+                                <div style="font-size:11px;color:#64748b;margin-bottom:4px;">No. Tiket</div>
+                                <div style="font-size:17px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#0ea5e9;">${res.ticket_number}</div>
                             </div>`,
-                        background: '#1e2339',
-                        color: '#fff',
-                        confirmButtonColor: '#00d4ff'
+                        background: '#fff',
+                        color: '#0f172a',
+                        confirmButtonColor: '#0ea5e9'
                     }).then(() => {
                         window.location.href = res.redirect_url;
                     });
@@ -1628,8 +1674,8 @@
                         icon: 'error',
                         title: 'Gagal!',
                         text: xhr.responseJSON?.message || 'Error',
-                        background: '#1e2339',
-                        color: '#fff'
+                        background: '#fff',
+                        color: '#0f172a'
                     });
                 }
             });

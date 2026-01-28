@@ -29,25 +29,33 @@
            CSS VARIABLES - Design System
            ======================================== */
         :root {
-            /* Color Palette - Dark Mode First */
-            --bg-primary: #0a0e27;
-            --bg-secondary: #151932;
-            --bg-tertiary: #1e2339;
-            --accent-primary: #00d4ff;
-            --accent-secondary: #7c3aed;
+            /* Color Palette - BRIGHT MODE */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+
+            /* Accent colors */
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #8b5cf6;
             --accent-success: #10b981;
             --accent-warning: #f59e0b;
             --accent-danger: #ef4444;
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
+
+            /* Text colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --text-muted: #64748b;
 
+            /* Border colors */
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+
             /* Gradients */
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
             --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            --gradient-cosmic: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+            --gradient-cosmic: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
 
             /* Spacing */
             --spacing-xs: 8px;
@@ -64,10 +72,10 @@
             --radius-full: 9999px;
 
             /* Shadows */
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-            --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.3);
         }
 
         /* ========================================
@@ -99,7 +107,7 @@
         }
 
         /* ========================================
-           ANIMATED BACKGROUND - Cosmic Theme
+           ANIMATED BACKGROUND - Modern Theme
            ======================================== */
         .cosmic-bg {
             position: fixed;
@@ -109,7 +117,7 @@
             bottom: 0;
             z-index: 0;
             overflow: hidden;
-            background: radial-gradient(ellipse at top, #1e293b 0%, #0a0e27 50%);
+            background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 50%, #fae8ff 100%);
         }
 
         .cosmic-bg::before {
@@ -120,9 +128,9 @@
             width: 200%;
             height: 200%;
             background:
-                radial-gradient(circle at 20% 30%, rgba(103, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
             animation: cosmicFloat 30s ease-in-out infinite;
         }
 
@@ -148,7 +156,7 @@
             height: 3px;
             background: var(--accent-primary);
             border-radius: 50%;
-            opacity: 0.6;
+            opacity: 0.3;
             animation: particleFloat 20s infinite;
         }
 
@@ -161,11 +169,11 @@
             }
 
             10% {
-                opacity: 0.6;
+                opacity: 0.3;
             }
 
             90% {
-                opacity: 0.6;
+                opacity: 0.3;
             }
 
             100% {
@@ -195,10 +203,11 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10, 14, 39, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            border-bottom: 2px solid var(--border-light);
             padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
         }
 
         .app-bar-content {
@@ -234,8 +243,8 @@
             width: 40px;
             height: 40px;
             border-radius: var(--radius-full);
-            background: rgba(148, 163, 184, 0.1);
-            border: none;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-light);
             color: var(--text-primary);
             display: flex;
             align-items: center;
@@ -246,7 +255,8 @@
 
         .icon-button:active {
             transform: scale(0.95);
-            background: rgba(148, 163, 184, 0.2);
+            background: var(--border-light);
+            border-color: var(--accent-primary);
         }
 
         .icon-button .badge {
@@ -262,7 +272,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid var(--bg-primary);
+            border: 2px solid white;
+            color: white;
         }
 
         /* ========================================
@@ -295,11 +306,12 @@
 
         .hero-greeting {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             opacity: 0.9;
             margin-bottom: 4px;
             letter-spacing: 0.5px;
             text-transform: uppercase;
+            color: white;
         }
 
         .hero-title {
@@ -307,12 +319,14 @@
             font-weight: 800;
             margin-bottom: var(--spacing-md);
             line-height: 1.2;
+            color: white;
         }
 
         .hero-subtitle {
             font-size: 15px;
-            opacity: 0.8;
+            opacity: 0.9;
             font-weight: 400;
+            color: white;
         }
 
         /* ========================================
@@ -332,14 +346,14 @@
         }
 
         .stat-card {
-            background: rgba(21, 25, 50, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: white;
+            border: 2px solid var(--border-light);
             border-radius: var(--radius-lg);
             padding: var(--spacing-md);
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
         }
 
         .stat-card::before {
@@ -349,7 +363,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, transparent 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -357,6 +371,7 @@
         .stat-card:active {
             transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
         }
 
         .stat-card:active::before {
@@ -373,42 +388,34 @@
             margin-bottom: var(--spacing-sm);
             font-size: 24px;
             position: relative;
-        }
-
-        .stat-icon::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: var(--radius-md);
-            padding: 1px;
-            background: inherit;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            opacity: 0.3;
+            color: white;
         }
 
         .stat-card.active .stat-icon {
             background: var(--gradient-cosmic);
-            box-shadow: var(--shadow-glow);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
         .stat-card.success .stat-icon {
             background: var(--gradient-success);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .stat-card.warning .stat-icon {
             background: var(--gradient-warning);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
         .stat-card.info .stat-icon {
             background: var(--gradient-primary);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
         .stat-label {
             font-size: 12px;
             color: var(--text-secondary);
             margin-bottom: 4px;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 0.3px;
         }
 
@@ -417,6 +424,7 @@
             font-weight: 800;
             font-family: 'Space Mono', monospace;
             line-height: 1;
+            color: var(--text-primary);
         }
 
         /* ========================================
@@ -432,17 +440,17 @@
             position: relative;
             display: flex;
             align-items: center;
-            background: rgba(21, 25, 50, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: white;
+            border: 2px solid var(--border-light);
             border-radius: var(--radius-full);
             padding: var(--spacing-sm) var(--spacing-md);
             transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
         }
 
         .search-box:focus-within {
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
 
         .search-box i {
@@ -459,6 +467,7 @@
             font-size: 15px;
             outline: none;
             font-family: 'Outfit', sans-serif;
+            font-weight: 500;
         }
 
         .search-input::placeholder {
@@ -469,7 +478,7 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: rgba(148, 163, 184, 0.2);
+            background: var(--bg-tertiary);
             border: none;
             color: var(--text-primary);
             display: none;
@@ -477,6 +486,11 @@
             justify-content: center;
             cursor: pointer;
             font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-clear:hover {
+            background: var(--border-medium);
         }
 
         .search-box.has-value .search-clear {
@@ -509,8 +523,8 @@
             flex-shrink: 0;
             padding: var(--spacing-sm) var(--spacing-md);
             border-radius: var(--radius-full);
-            background: rgba(148, 163, 184, 0.1);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: white;
+            border: 2px solid var(--border-light);
             color: var(--text-secondary);
             font-size: 14px;
             font-weight: 600;
@@ -523,8 +537,8 @@
         .filter-tab.active {
             background: var(--gradient-cosmic);
             border-color: transparent;
-            color: var(--text-primary);
-            box-shadow: var(--shadow-glow);
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
             transform: scale(1.05);
         }
 
@@ -567,13 +581,13 @@
            TICKET CARD
            ======================================== */
         .ticket-card {
-            background: rgba(21, 25, 50, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: white;
+            border: 2px solid var(--border-light);
             border-radius: var(--radius-lg);
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            box-shadow: var(--shadow-sm);
         }
 
         .ticket-card::before {
@@ -590,6 +604,7 @@
 
         .ticket-card:active {
             transform: scale(0.98);
+            box-shadow: var(--shadow-md);
         }
 
         .ticket-card.has-sla-warning::before {
@@ -603,6 +618,8 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: var(--spacing-sm);
+            background: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border-light);
         }
 
         .ticket-number {
@@ -614,7 +631,7 @@
 
         .ticket-id {
             font-size: 13px;
-            color: var(--text-muted);
+            color: var(--text-primary);
             font-family: 'Space Mono', monospace;
             font-weight: 700;
         }
@@ -638,6 +655,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            color: white;
         }
 
         .status-badge::before {
@@ -658,53 +676,45 @@
             }
 
             50% {
-                opacity: 0.5;
+                opacity: 0.7;
                 transform: scale(1.2);
             }
         }
 
         .status-open {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         }
 
         .status-pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         }
 
         .status-approved {
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
 
         .status-assigned {
-            background: rgba(124, 58, 237, 0.2);
-            color: #a78bfa;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
 
         .status-in-progress {
-            background: rgba(0, 212, 255, 0.2);
-            color: #00d4ff;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
         }
 
         .status-resolved {
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
 
         .status-closed {
-            background: rgba(100, 116, 139, 0.2);
-            color: #94a3b8;
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
         }
 
         .status-rejected {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         }
 
         .ticket-body {
-            padding: 0 var(--spacing-md) var(--spacing-md);
+            padding: var(--spacing-md);
         }
 
         .ticket-title {
@@ -731,16 +741,17 @@
             align-items: center;
             gap: 6px;
             padding: 6px 12px;
-            background: rgba(148, 163, 184, 0.1);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-full);
             font-size: 12px;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .meta-chip i {
             font-size: 14px;
-            opacity: 0.7;
+            color: var(--accent-primary);
         }
 
         .priority-badge {
@@ -750,6 +761,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: white;
         }
 
         .priority-critical {
@@ -791,7 +803,7 @@
             }
 
             50% {
-                opacity: 0.7;
+                opacity: 0.8;
             }
         }
 
@@ -803,9 +815,10 @@
 
         .ticket-actions {
             padding: var(--spacing-md);
-            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            border-top: 2px solid var(--border-light);
             display: flex;
             gap: var(--spacing-sm);
+            background: var(--bg-tertiary);
         }
 
         .action-button {
@@ -830,19 +843,25 @@
 
         .action-primary {
             background: var(--gradient-cosmic);
-            color: var(--text-primary);
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
         .action-secondary {
-            background: rgba(148, 163, 184, 0.1);
+            background: white;
             color: var(--text-primary);
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            border: 2px solid var(--border-medium);
+        }
+
+        .action-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
         }
 
         .action-danger {
             background: var(--gradient-danger);
-            color: var(--text-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         /* ========================================
@@ -861,14 +880,14 @@
             border-radius: var(--radius-full);
             background: var(--gradient-cosmic);
             border: none;
-            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(14, 165, 233, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
-            color: var(--text-primary);
+            color: white;
         }
 
         .fab i {
@@ -920,13 +939,14 @@
             width: 120px;
             height: 120px;
             border-radius: var(--radius-full);
-            background: rgba(148, 163, 184, 0.1);
+            background: var(--bg-tertiary);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 48px;
             color: var(--text-muted);
             margin-bottom: var(--spacing-md);
+            border: 3px solid var(--border-light);
         }
 
         .empty-title {
@@ -948,7 +968,7 @@
             border-radius: var(--radius-full);
             background: var(--gradient-cosmic);
             border: none;
-            color: var(--text-primary);
+            color: white;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -958,6 +978,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
         .empty-action:active {
@@ -1023,14 +1044,15 @@
            SWEETALERT2 CUSTOM STYLES
            ======================================== */
         .swal2-popup {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid rgba(148, 163, 184, 0.2) !important;
+            background: white !important;
+            border: 2px solid var(--border-light) !important;
             border-radius: 16px !important;
             color: var(--text-primary) !important;
         }
 
         .swal2-title {
             color: var(--text-primary) !important;
+            font-weight: 700 !important;
         }
 
         .swal2-html-container {
@@ -1625,12 +1647,12 @@
             // ==========================================
             // INITIALIZATION LOG
             // ==========================================
-            console.log('%c🎫 Ticket Management System', 'font-size: 20px; font-weight: bold; color: #00d4ff;');
-            console.log('%c✨ Clean, Powerful & Modern', 'font-size: 14px; color: #7c3aed;');
+            console.log('%c🎫 Ticket Management System', 'font-size: 20px; font-weight: bold; color: #0ea5e9;');
+            console.log('%c✨ Clean, Powerful & Modern', 'font-size: 14px; color: #8b5cf6;');
             console.log('%c📋 Total Tickets: ' + $('.ticket-card').length, 'font-size: 12px; color: #10b981;');
             console.log('%c\n💡 Keyboard Shortcuts:', 'font-size: 14px; font-weight: bold; color: #f59e0b;');
-            console.log('%c   • Ctrl/Cmd + K : Focus Search', 'font-size: 12px; color: #94a3b8;');
-            console.log('%c   • ESC : Clear Search', 'font-size: 12px; color: #94a3b8;');
+            console.log('%c   • Ctrl/Cmd + K : Focus Search', 'font-size: 12px; color: #64748b;');
+            console.log('%c   • ESC : Clear Search', 'font-size: 12px; color: #64748b;');
         });
     </script>
 </body>

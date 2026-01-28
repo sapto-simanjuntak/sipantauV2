@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $ticket->ticket_number }} - Ticket Detail</title>
@@ -18,103 +18,92 @@
     <!-- Boxicons -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
     <style>
-        /* ========================================
-           CSS VARIABLES
-           ======================================== */
         :root {
-            --bg-primary: #0a0e27;
-            --bg-secondary: #151932;
-            --bg-tertiary: #1e2339;
-            --accent-primary: #00d4ff;
-            --accent-secondary: #7c3aed;
+            /* Warna background lebih terang */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+
+            /* Accent colors lebih vibrant */
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #8b5cf6;
             --accent-success: #10b981;
             --accent-warning: #f59e0b;
             --accent-danger: #ef4444;
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
+
+            /* Text colors lebih kontras */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --text-muted: #64748b;
 
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            --gradient-cosmic: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
-
-            --spacing-xs: 8px;
-            --spacing-sm: 12px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --radius-full: 9999px;
-
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-            --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+            /* Border colors */
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
         }
 
-        /* ========================================
-           RESET & BASE
-           ======================================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        html {
-            scroll-behavior: smooth;
+        html,
+        body {
+            width: 100%;
+            max-width: 100vw;
             overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Prevent any element from causing horizontal scroll */
+        * {
+            max-width: 100%;
+        }
+
+        img,
+        video,
+        iframe {
+            max-width: 100%;
+            height: auto;
         }
 
         body {
             font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            overflow-x: hidden;
             line-height: 1.6;
-            max-width: 100vw;
         }
 
-        /* ========================================
-           COSMIC BACKGROUND
-           ======================================== */
+        /* Modern Background */
         .cosmic-bg {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             z-index: 0;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 50%, #fae8ff 100%);
             overflow: hidden;
-            background: radial-gradient(ellipse at top, #1e293b 0%, #0a0e27 50%);
         }
 
         .cosmic-bg::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
             width: 200%;
             height: 200%;
+            top: -50%;
+            left: -50%;
             background:
-                radial-gradient(circle at 20% 30%, rgba(103, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
-            animation: cosmicFloat 30s ease-in-out infinite;
+                radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            animation: cosmicFloat 40s ease-in-out infinite;
         }
 
         @keyframes cosmicFloat {
@@ -124,12 +113,8 @@
                 transform: translate(0, 0) rotate(0deg);
             }
 
-            33% {
-                transform: translate(30px, -30px) rotate(120deg);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) rotate(240deg);
+            50% {
+                transform: translate(20px, -20px) rotate(180deg);
             }
         }
 
@@ -139,94 +124,80 @@
             height: 3px;
             background: var(--accent-primary);
             border-radius: 50%;
-            opacity: 0.6;
-            animation: particleFloat 20s infinite;
+            opacity: 0.3;
+            animation: particleFloat 25s linear infinite;
         }
 
         @keyframes particleFloat {
-
-            0%,
-            100% {
-                transform: translateY(0) translateX(0);
+            0% {
+                transform: translateY(0);
                 opacity: 0;
             }
 
             10% {
-                opacity: 0.6;
+                opacity: 0.3;
             }
 
             90% {
-                opacity: 0.6;
+                opacity: 0.3;
             }
 
             100% {
-                transform: translateY(-100vh) translateX(50px);
+                transform: translateY(-100vh);
                 opacity: 0;
             }
         }
 
-        /* ========================================
-           LAYOUT
-           ======================================== */
+        /* Layout */
         .page-wrapper {
             position: relative;
             z-index: 1;
             min-height: 100vh;
             width: 100%;
-            max-width: 100vw;
             overflow-x: hidden;
         }
 
         .page-content {
-            padding: var(--spacing-lg);
+            padding: 24px 24px;
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            box-sizing: border-box;
         }
 
-        /* ========================================
-           TOP BAR
-           ======================================== */
+        /* Top Bar - FIXED */
         .top-bar {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10, 14, 39, 0.95);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-            padding: var(--spacing-md) var(--spacing-lg);
-            margin: calc(var(--spacing-lg) * -1) calc(var(--spacing-lg) * -1) var(--spacing-lg);
-            width: calc(100% + var(--spacing-lg) * 2);
-            margin-left: calc(var(--spacing-lg) * -1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid var(--border-light);
+            padding: 16px 0;
+            margin-bottom: 24px;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .top-bar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: var(--spacing-md);
+            gap: 16px;
             flex-wrap: wrap;
-            max-width: 100%;
         }
 
         .breadcrumb {
             display: flex;
             align-items: center;
-            gap: var(--spacing-xs);
+            gap: 8px;
             font-size: 14px;
             color: var(--text-secondary);
             flex-wrap: wrap;
-            min-width: 0;
             flex: 1;
-            overflow: hidden;
-        }
-
-        .breadcrumb a,
-        .breadcrumb span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex-shrink: 1;
             min-width: 0;
         }
 
@@ -234,6 +205,7 @@
             color: var(--text-secondary);
             text-decoration: none;
             transition: color 0.3s;
+            font-weight: 500;
         }
 
         .breadcrumb a:hover {
@@ -242,28 +214,28 @@
 
         .breadcrumb-active {
             color: var(--text-primary);
-            font-weight: 600;
-            max-width: 150px;
-        }
-
-        .breadcrumb i {
-            flex-shrink: 0;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
         }
 
         .top-bar-actions {
             display: flex;
-            gap: var(--spacing-sm);
+            gap: 12px;
             flex-shrink: 0;
         }
 
+        /* Buttons */
         .btn {
             padding: 10px 20px;
-            border-radius: var(--radius-md);
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -272,100 +244,95 @@
         }
 
         .btn:active {
-            transform: scale(0.95);
+            transform: scale(0.97);
         }
 
         .btn-primary {
-            background: var(--gradient-cosmic);
-            color: var(--text-primary);
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+            transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background: rgba(148, 163, 184, 0.1);
+            background: white;
             color: var(--text-primary);
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            border: 2px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
         }
 
         .btn-success {
-            background: var(--gradient-success);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .btn-danger {
-            background: var(--gradient-danger);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .btn-warning {
-            background: var(--gradient-warning);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
         .btn-info {
-            background: var(--gradient-primary);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
-        .btn-dark {
-            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-            color: var(--text-primary);
-        }
-
-        /* ========================================
-           TICKET HEADER CARD
-           ======================================== */
+        /* Cards */
         .ticket-header-card {
-            background: rgba(21, 25, 50, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: var(--radius-lg);
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
             overflow: hidden;
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: 24px;
             width: 100%;
             max-width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .ticket-header {
-            background: var(--gradient-cosmic);
-            padding: var(--spacing-xl);
+            background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            padding: 32px;
             position: relative;
-            overflow: hidden;
-        }
-
-        .ticket-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></svg>');
-            opacity: 0.3;
-        }
-
-        .ticket-header-content {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            overflow: hidden;
+            box-sizing: border-box;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         .ticket-number-large {
             font-size: 28px;
             font-weight: 800;
             font-family: 'Space Mono', monospace;
-            margin-bottom: var(--spacing-sm);
-            word-break: break-word;
+            margin-bottom: 12px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            color: white;
         }
 
         .ticket-title-large {
             font-size: 20px;
             font-weight: 600;
-            margin-bottom: var(--spacing-md);
+            margin-bottom: 16px;
             line-height: 1.4;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            color: white;
         }
 
         .badge {
@@ -373,30 +340,32 @@
             align-items: center;
             gap: 6px;
             padding: 8px 16px;
-            border-radius: var(--radius-full);
+            border-radius: 999px;
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .badge-group {
             display: flex;
-            gap: var(--spacing-sm);
+            gap: 12px;
             flex-wrap: wrap;
+            max-width: 100%;
         }
 
-        /* ========================================
-           TICKET BADGES CONTAINER - MOBILE FRIENDLY
-           ======================================== */
         .ticket-badges-container {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             flex-wrap: wrap;
-            gap: var(--spacing-md);
+            gap: 16px;
             width: 100%;
+            max-width: 100%;
         }
 
         .sla-status-box {
@@ -405,27 +374,17 @@
 
         .sla-label {
             font-size: 12px;
-            opacity: 0.8;
+            opacity: 0.9;
             margin-bottom: 6px;
+            color: white;
+            font-weight: 600;
         }
 
         .sla-deadline {
             font-size: 11px;
-            opacity: 0.7;
+            opacity: 0.85;
             margin-top: 6px;
-            word-wrap: break-word;
-        }
-
-        @media (max-width: 640px) {
-            .ticket-badges-container {
-                flex-direction: column;
-                gap: var(--spacing-md);
-            }
-
-            .sla-status-box {
-                text-align: left;
-                width: 100%;
-            }
+            color: white;
         }
 
         .sla-pulse {
@@ -441,75 +400,44 @@
             }
 
             50% {
-                opacity: 0.7;
-                transform: scale(1.05);
+                opacity: 0.9;
+                transform: scale(1.03);
             }
         }
 
-        /* ========================================
-           ACTION BUTTONS BAR - IMPROVED MOBILE
-           ======================================== */
+        /* Action Bar */
         .action-bar {
-            padding: var(--spacing-md);
-            background: rgba(30, 35, 57, 0.5);
-            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-top: 2px solid var(--border-light);
             display: flex;
+            gap: 12px;
             flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            width: 100%;
         }
 
         .action-bar .btn {
-            flex: 1 1 auto;
+            flex: 1;
             min-width: 140px;
             justify-content: center;
         }
 
-        /* Mobile: Stack buttons vertically */
-        @media (max-width: 768px) {
-            .action-bar {
-                flex-direction: column;
-                gap: var(--spacing-xs);
-            }
-
-            .action-bar .btn {
-                width: 100%;
-                min-width: 0;
-                font-size: 14px;
-                padding: 12px 16px;
-            }
-        }
-
-        /* Small mobile: Ensure proper spacing */
-        @media (max-width: 480px) {
-            .action-bar {
-                padding: var(--spacing-sm);
-            }
-
-            .action-bar .btn {
-                font-size: 13px;
-                padding: 10px 14px;
-            }
-        }
-
-        /* ========================================
-           CONTENT CARDS
-           ======================================== */
         .card {
-            background: rgba(21, 25, 50, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: var(--radius-lg);
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
             overflow: hidden;
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: 24px;
             width: 100%;
             max-width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .card-header {
-            padding: var(--spacing-md) var(--spacing-lg);
-            background: rgba(30, 35, 57, 0.5);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 16px 24px;
+            background: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border-light);
+            box-sizing: border-box;
         }
 
         .card-title {
@@ -518,36 +446,42 @@
             margin: 0;
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
+            gap: 12px;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            color: var(--text-primary);
         }
 
         .card-body {
-            padding: var(--spacing-lg);
-            word-wrap: break-word;
+            padding: 24px;
+            box-sizing: border-box;
             overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
-        /* ========================================
-           INFO ROWS
-           ======================================== */
+        /* Info Rows */
         .info-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
         }
 
         .info-item {
-            margin-bottom: var(--spacing-md);
-            min-width: 0;
-            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
         }
 
         .info-label {
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-secondary);
             margin-bottom: 6px;
             text-transform: uppercase;
@@ -560,10 +494,15 @@
             line-height: 1.6;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
         }
 
         .info-value strong {
             font-weight: 700;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            color: var(--text-primary);
         }
 
         .info-value small {
@@ -575,13 +514,10 @@
             overflow-wrap: break-word;
         }
 
-        /* ========================================
-           TIMELINE
-           ======================================== */
+        /* Timeline */
         .timeline {
             position: relative;
             padding-left: 40px;
-            width: 100%;
         }
 
         .timeline::before {
@@ -591,13 +527,12 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: rgba(148, 163, 184, 0.2);
+            background: var(--border-medium);
         }
 
         .timeline-item {
             position: relative;
-            padding-bottom: var(--spacing-lg);
-            width: 100%;
+            padding-bottom: 24px;
         }
 
         .timeline-item:last-child {
@@ -615,88 +550,78 @@
             justify-content: center;
             font-size: 12px;
             color: white;
-            z-index: 1;
-            box-shadow: 0 0 0 4px var(--bg-tertiary);
+            box-shadow: 0 0 0 4px white;
         }
 
         .timeline-content {
-            background: rgba(30, 35, 57, 0.5);
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 12px;
             border-left: 3px solid var(--accent-primary);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
         .timeline-title {
             font-weight: 700;
             font-size: 15px;
+            color: var(--text-primary);
             margin-bottom: 4px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
         .timeline-description {
             font-size: 13px;
             color: var(--text-secondary);
-            margin-bottom: var(--spacing-xs);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            margin-bottom: 8px;
         }
 
         .timeline-meta {
             font-size: 12px;
             color: var(--text-muted);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
-        /* ========================================
-           ATTACHMENT
-           ======================================== */
+        /* Attachments */
         .attachment-item {
-            background: rgba(30, 35, 57, 0.5);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.3s;
+            gap: 12px;
             flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            width: 100%;
+            transition: all 0.3s;
         }
 
         .attachment-item:hover {
             border-color: var(--accent-primary);
-            background: rgba(0, 212, 255, 0.05);
+            background: rgba(14, 165, 233, 0.05);
+            transform: translateY(-2px);
         }
 
         .attachment-info {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
+            gap: 12px;
             flex: 1;
             min-width: 0;
-            overflow: hidden;
         }
 
         .attachment-info span {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
-        /* ========================================
-           RESPONSIVE GRID
-           ======================================== */
+        /* Grid Layout */
         .detail-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: var(--spacing-lg);
+            gap: 24px;
             width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         @media (min-width: 1024px) {
@@ -705,104 +630,110 @@
             }
         }
 
-        /* ========================================
-           RESPONSIVE
-           ======================================== */
+        /* Force no overflow on all child elements */
+        .detail-grid>* {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .page-content {
-                padding: var(--spacing-md);
-            }
-
-            .top-bar {
-                padding: var(--spacing-md);
-                margin: calc(var(--spacing-md) * -1) calc(var(--spacing-md) * -1) var(--spacing-md);
-                width: calc(100% + var(--spacing-md) * 2);
-                margin-left: calc(var(--spacing-md) * -1);
+                padding: 16px 12px;
             }
 
             .top-bar-content {
+                padding: 0 12px;
                 flex-direction: column;
                 align-items: stretch;
             }
 
             .breadcrumb {
                 font-size: 12px;
-                max-width: 100%;
             }
 
             .breadcrumb-active {
-                max-width: 120px;
+                max-width: 150px;
             }
 
             .top-bar-actions {
                 width: 100%;
-                flex-wrap: wrap;
             }
 
             .top-bar-actions .btn {
                 flex: 1;
-                min-width: 0;
+                font-size: 13px;
             }
 
             .ticket-header {
-                padding: var(--spacing-lg);
+                padding: 20px 16px;
             }
 
             .ticket-number-large {
-                font-size: 20px;
+                font-size: 22px;
             }
 
             .ticket-title-large {
-                font-size: 16px;
+                font-size: 17px;
             }
 
-            .badge {
-                font-size: 10px;
-                padding: 6px 12px;
+            .ticket-badges-container {
+                flex-direction: column;
             }
 
-            .badge-group {
-                gap: 6px;
+            .sla-status-box {
+                text-align: left;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                padding: 12px;
+            }
+
+            .action-bar .btn {
+                width: 100%;
+                min-width: 0;
             }
 
             .info-row {
                 grid-template-columns: 1fr;
-                gap: var(--spacing-md);
             }
 
             .card-body {
-                padding: var(--spacing-md);
+                padding: 16px 12px;
             }
 
             .card-header {
-                padding: var(--spacing-sm) var(--spacing-md);
-            }
-
-            .card-title {
-                font-size: 16px;
+                padding: 12px 16px;
             }
 
             .timeline {
-                padding-left: 30px;
-            }
-
-            .timeline::before {
-                left: 8px;
+                padding-left: 32px;
             }
 
             .timeline-icon {
-                left: -30px;
+                left: -32px;
                 width: 20px;
                 height: 20px;
                 font-size: 10px;
             }
-
-            .timeline-content {
-                padding: var(--spacing-sm);
-            }
         }
 
         @media (max-width: 480px) {
+            .page-content {
+                padding: 12px 8px;
+            }
+
+            .top-bar-content {
+                padding: 0 8px;
+            }
+
+            .ticket-header {
+                padding: 16px 12px;
+            }
+
             .ticket-number-large {
                 font-size: 18px;
             }
@@ -811,45 +742,34 @@
                 font-size: 15px;
             }
 
-            .info-label {
-                font-size: 11px;
+            .badge {
+                font-size: 10px;
+                padding: 6px 12px;
             }
 
-            .info-value {
-                font-size: 14px;
+            .card-body {
+                padding: 12px 10px;
             }
 
-            .breadcrumb-active {
-                max-width: 100px;
+            .card-header {
+                padding: 10px 12px;
             }
 
-            .top-bar-actions {
-                flex-direction: column;
-            }
-
-            .top-bar-actions .btn {
-                width: 100%;
+            .action-bar {
+                padding: 10px 8px;
             }
         }
 
-        /* ========================================
-           UTILITY CLASSES
-           ======================================== */
+        /* Utilities */
         .text-muted {
             color: var(--text-muted);
         }
 
         .mb-0 {
-            margin-bottom: 0;
+            margin-bottom: 0 !important;
         }
 
-        .mt-2 {
-            margin-top: var(--spacing-sm);
-        }
-
-        /* ========================================
-           ANIMATIONS
-           ======================================== */
+        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -866,13 +786,47 @@
             animation: fadeInUp 0.5s ease;
         }
 
-        /* ========================================
-           SWEETALERT2 CUSTOM
-           ======================================== */
+        /* Modal Custom */
+        .modal-content {
+            background: white !important;
+            border: 2px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 2px solid var(--border-light);
+            background: var(--bg-tertiary);
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: white;
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        /* SweetAlert Custom */
         .swal2-popup {
-            background: var(--bg-tertiary) !important;
-            border: 1px solid rgba(148, 163, 184, 0.2) !important;
-            border-radius: 16px !important;
+            background: white !important;
+            border: 2px solid var(--border-light) !important;
             color: var(--text-primary) !important;
         }
 
@@ -883,39 +837,14 @@
         .swal2-html-container {
             color: var(--text-secondary) !important;
         }
-
-        .swal2-confirm,
-        .swal2-cancel {
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            padding: 10px 24px !important;
-            font-family: 'Outfit', sans-serif !important;
-        }
-
-        .swal2-input,
-        .swal2-textarea,
-        .swal2-select {
-            background: var(--bg-secondary) !important;
-            border: 1px solid rgba(148, 163, 184, 0.2) !important;
-            color: var(--text-primary) !important;
-        }
-
-        .swal2-input:focus,
-        .swal2-textarea:focus,
-        .swal2-select:focus {
-            border-color: var(--accent-primary) !important;
-            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1) !important;
-        }
     </style>
 </head>
 
 <body>
     <!-- Cosmic Background -->
-    <div class="cosmic-bg" id="cosmicBg">
-        @for ($i = 0; $i < 20; $i++)
-            <div class="particle"
-                style="left: {{ rand(0, 100) }}%; animation-delay: {{ rand(0, 20) }}s; animation-duration: {{ rand(15, 25) }}s;">
-            </div>
+    <div class="cosmic-bg">
+        @for ($i = 0; $i < 12; $i++)
+            <div class="particle" style="left: {{ rand(0, 100) }}%; animation-delay: {{ rand(0, 25) }}s;"></div>
         @endfor
     </div>
 
@@ -935,7 +864,7 @@
                         target="_blank">
                         <i class='bx bx-printer'></i> Print
                     </a>
-                    <a href="{{ route('service.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('ticket.index') }}" class="btn btn-secondary">
                         <i class='bx bx-arrow-back'></i> Kembali
                     </a>
                 </div>
@@ -946,134 +875,80 @@
             <!-- Ticket Header Card -->
             <div class="ticket-header-card animate-fade-in">
                 <div class="ticket-header">
-                    <div class="ticket-header-content">
-                        <div class="ticket-number-large">#{{ $ticket->ticket_number }}</div>
-                        <div class="ticket-title-large">{{ $ticket->issue_title }}</div>
+                    <div class="ticket-number-large">#{{ $ticket->ticket_number }}</div>
+                    <div class="ticket-title-large">{{ $ticket->issue_title }}</div>
 
-                        <div class="ticket-badges-container">
-                            <div class="badge-group">
-                                @php
-                                    $statusColors = [
-                                        'Open' => 'rgba(59, 130, 246, 0.2)',
-                                        'Pending' => 'rgba(245, 158, 11, 0.2)',
-                                        'Approved' => 'rgba(0, 212, 255, 0.2)',
-                                        'Assigned' => 'rgba(124, 58, 237, 0.2)',
-                                        'In Progress' => 'rgba(0, 212, 255, 0.2)',
-                                        'Resolved' => 'rgba(16, 185, 129, 0.2)',
-                                        'Closed' => 'rgba(100, 116, 139, 0.2)',
-                                        'Rejected' => 'rgba(239, 68, 68, 0.2)',
-                                    ];
-                                    $statusTextColors = [
-                                        'Open' => '#60a5fa',
-                                        'Pending' => '#fbbf24',
-                                        'Approved' => '#00d4ff',
-                                        'Assigned' => '#a78bfa',
-                                        'In Progress' => '#00d4ff',
-                                        'Resolved' => '#34d399',
-                                        'Closed' => '#94a3b8',
-                                        'Rejected' => '#f87171',
-                                    ];
-                                @endphp
-                                <span class="badge"
-                                    style="background: {{ $statusColors[$ticket->ticket_status] ?? 'rgba(148, 163, 184, 0.2)' }}; color: {{ $statusTextColors[$ticket->ticket_status] ?? '#94a3b8' }};">
-                                    {{ $ticket->ticket_status }}
+                    <div class="ticket-badges-container">
+                        <div class="badge-group">
+                            @php
+                                $statusColors = [
+                                    'Open' => 'rgba(59, 130, 246, 0.9)',
+                                    'Pending' => 'rgba(245, 158, 11, 0.9)',
+                                    'Approved' => 'rgba(14, 165, 233, 0.9)',
+                                    'Assigned' => 'rgba(139, 92, 246, 0.9)',
+                                    'In Progress' => 'rgba(14, 165, 233, 0.9)',
+                                    'Resolved' => 'rgba(16, 185, 129, 0.9)',
+                                    'Closed' => 'rgba(100, 116, 139, 0.9)',
+                                    'Rejected' => 'rgba(239, 68, 68, 0.9)',
+                                ];
+                                $statusTextColors = [
+                                    'Open' => '#ffffff',
+                                    'Pending' => '#ffffff',
+                                    'Approved' => '#ffffff',
+                                    'Assigned' => '#ffffff',
+                                    'In Progress' => '#ffffff',
+                                    'Resolved' => '#ffffff',
+                                    'Closed' => '#ffffff',
+                                    'Rejected' => '#ffffff',
+                                ];
+                            @endphp
+                            <span class="badge"
+                                style="background: {{ $statusColors[$ticket->ticket_status] ?? 'rgba(148, 163, 184, 0.9)' }}; color: {{ $statusTextColors[$ticket->ticket_status] ?? '#ffffff' }};">
+                                {{ $ticket->ticket_status }}
+                            </span>
+
+                            @php
+                                $priorityColors = [
+                                    'Critical' => 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);',
+                                    'High' => 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);',
+                                    'Medium' => 'background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);',
+                                    'Low' => 'background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);',
+                                ];
+                            @endphp
+                            <span class="badge" style="{{ $priorityColors[$ticket->priority] ?? '' }}">
+                                {{ $ticket->priority }}
+                            </span>
+
+                            @if ($ticket->impact_patient_care)
+                                <span class="badge sla-pulse"
+                                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                    <i class='bx bx-error-circle'></i> Patient Impact
                                 </span>
+                            @endif
+                        </div>
 
-                                @php
-                                    $priorityColors = [
-                                        'Critical' => 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);',
-                                        'High' => 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);',
-                                        'Medium' => 'background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);',
-                                        'Low' => 'background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);',
-                                    ];
-                                @endphp
-                                <span class="badge" style="{{ $priorityColors[$ticket->priority] ?? '' }}">
-                                    {{ $ticket->priority }}
-                                </span>
-
-                                @if ($ticket->impact_patient_care)
-                                    <span class="badge sla-pulse"
-                                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                                        <i class='bx bx-error-circle'></i> Patient Impact
-                                    </span>
-                                @endif
-                            </div>
-
-                            <div class="sla-status-box">
-                                <div class="sla-label">SLA Status</div>
-                                <span class="badge {{ $slaStatus['status'] === 'overdue' ? 'sla-pulse' : '' }}"
-                                    style="background: {{ $slaStatus['class'] === 'danger' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : ($slaStatus['class'] === 'warning' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)') }};">
-                                    <i class='bx bx-time-five'></i> {{ $slaStatus['message'] }}
-                                </span>
-                                @if ($ticket->sla_deadline)
-                                    <div class="sla-deadline">
-                                        Deadline:
-                                        {{ \Carbon\Carbon::parse($ticket->sla_deadline)->format('d M Y, H:i') }}
-                                    </div>
-                                @endif
-                            </div>
+                        <div class="sla-status-box">
+                            <div class="sla-label">SLA Status</div>
+                            <span class="badge {{ $slaStatus['status'] === 'overdue' ? 'sla-pulse' : '' }}"
+                                style="background: {{ $slaStatus['class'] === 'danger' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : ($slaStatus['class'] === 'warning' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)') }};">
+                                <i class='bx bx-time-five'></i> {{ $slaStatus['message'] }}
+                            </span>
+                            @if ($ticket->sla_deadline)
+                                <div class="sla-deadline">
+                                    Deadline: {{ \Carbon\Carbon::parse($ticket->sla_deadline)->format('d M Y, H:i') }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="action-bar">
-                    @role('superadmin|admin')
-                        @if ($ticket->validation_status === 'pending' && in_array($ticket->ticket_status, ['Open', 'Pending']))
-                            <button type="button" class="btn btn-success" id="btn-approve">
-                                <i class='bx bx-check-circle'></i> Approve
-                            </button>
-                            <button type="button" class="btn btn-danger" id="btn-reject">
-                                <i class='bx bx-x-circle'></i> Reject
-                            </button>
-                        @endif
-
-                        @if (in_array($ticket->ticket_status, ['Open', 'Pending', 'Approved']) && !$ticket->assigned_to)
-                            <button type="button" class="btn btn-primary" id="btn-assign">
-                                <i class='bx bx-user-check'></i> Assign
-                            </button>
-                        @endif
-
-                        @if ($ticket->assigned_to && in_array($ticket->ticket_status, ['Assigned', 'In Progress']))
-                            <button type="button" class="btn btn-info" id="btn-reassign">
-                                <i class='bx bx-transfer'></i> Re-assign
-                            </button>
-                        @endif
-
-                        @if (!in_array($ticket->ticket_status, ['Closed', 'Rejected']))
-                            <button type="button" class="btn btn-warning" id="btn-update-status">
-                                <i class='bx bx-edit'></i> Update Status
-                            </button>
-                        @endif
-
-                        @if (in_array($ticket->ticket_status, ['Resolved']))
-                            <button type="button" class="btn btn-dark" id="btn-close">
-                                <i class='bx bx-check-double'></i> Close Ticket
-                            </button>
-                        @endif
-                    @endrole
-
-                    @role('teknisi')
-                        @if ($ticket->assigned_to === auth()->id() && !in_array($ticket->ticket_status, ['Closed', 'Rejected']))
-                            <button type="button" class="btn btn-warning" id="btn-update-status">
-                                <i class='bx bx-edit'></i> Update Status
-                            </button>
-                        @endif
-                    @endrole
-
-                    @role('superadmin|admin|teknisi')
-                        @if (!in_array($ticket->ticket_status, ['Closed', 'Rejected']))
-                            <a href="{{ route('service.edit', $ticket->ticket_number) }}" class="btn btn-secondary">
-                                <i class='bx bx-edit-alt'></i> Edit
-                            </a>
-                        @endif
-                    @else
-                        @if ($ticket->validation_status === 'pending')
-                            <a href="{{ route('service.edit', $ticket->ticket_number) }}" class="btn btn-secondary">
-                                <i class='bx bx-edit-alt'></i> Edit
-                            </a>
-                        @endif
-                    @endrole
+                    @if ($ticket->validation_status === 'pending')
+                        <a href="{{ route('service.edit', $ticket->ticket_number) }}" class="btn btn-secondary">
+                            <i class='bx bx-edit-alt'></i> Edit
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -1108,7 +983,7 @@
                                     <div class="info-value">
                                         @if ($ticket->hospitalUnit)
                                             <span class="badge"
-                                                style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">
+                                                style="background: rgba(14, 165, 233, 0.15); color: #0284c7; font-weight: 700;">
                                                 {{ $ticket->hospitalUnit->unit_code }}
                                             </span>
                                             <strong
@@ -1126,20 +1001,20 @@
                                         @if ($ticket->problemCategory)
                                             @php
                                                 $categoryBadges = [
-                                                    'HW' => 'rgba(59, 130, 246, 0.2)',
-                                                    'SW' => 'rgba(0, 212, 255, 0.2)',
-                                                    'NET' => 'rgba(245, 158, 11, 0.2)',
-                                                    'PABX' => 'rgba(148, 163, 184, 0.2)',
-                                                    'CCTV' => 'rgba(100, 116, 139, 0.2)',
-                                                    'AC' => 'rgba(16, 185, 129, 0.2)',
-                                                    'DEV' => 'rgba(239, 68, 68, 0.2)',
-                                                    'EMAIL' => 'rgba(59, 130, 246, 0.2)',
+                                                    'HW' => 'background: rgba(59, 130, 246, 0.15); color: #2563eb;',
+                                                    'SW' => 'background: rgba(14, 165, 233, 0.15); color: #0284c7;',
+                                                    'NET' => 'background: rgba(245, 158, 11, 0.15); color: #d97706;',
+                                                    'PABX' => 'background: rgba(139, 92, 246, 0.15); color: #7c3aed;',
+                                                    'CCTV' => 'background: rgba(100, 116, 139, 0.15); color: #475569;',
+                                                    'AC' => 'background: rgba(16, 185, 129, 0.15); color: #059669;',
+                                                    'DEV' => 'background: rgba(239, 68, 68, 0.15); color: #dc2626;',
+                                                    'EMAIL' => 'background: rgba(59, 130, 246, 0.15); color: #2563eb;',
                                                 ];
-                                                $badgeColor =
+                                                $badgeStyle =
                                                     $categoryBadges[$ticket->problemCategory->category_code] ??
-                                                    'rgba(148, 163, 184, 0.2)';
+                                                    'background: rgba(100, 116, 139, 0.15); color: #475569;';
                                             @endphp
-                                            <span class="badge" style="background: {{ $badgeColor }};">
+                                            <span class="badge" style="{{ $badgeStyle }} font-weight: 700;">
                                                 {{ $ticket->problemCategory->category_name }}
                                             </span>
                                             @if ($ticket->problemSubCategory)
@@ -1245,7 +1120,8 @@
                             <div class="card-body">
                                 <div class="attachment-item">
                                     <div class="attachment-info">
-                                        <i class='bx bx-file' style="font-size: 24px;"></i>
+                                        <i class='bx bx-file'
+                                            style="font-size: 24px; color: var(--accent-primary);"></i>
                                         <span>{{ basename($ticket->file_path) }}</span>
                                     </div>
                                     <a href="{{ Storage::url($ticket->file_path) }}" target="_blank"
@@ -1281,13 +1157,10 @@
                                     </div>
                                 </div>
                                 @if ($ticket->validation_notes)
-                                    <div class="info-item" style="margin-top: var(--spacing-md);">
+                                    <div class="info-item" style="margin-top: 16px;">
                                         <div class="info-label">Notes</div>
                                         <div
-                                            style="background: {{ $ticket->validation_status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }};
-                                                    border-left: 3px solid {{ $ticket->validation_status === 'approved' ? 'var(--accent-success)' : 'var(--accent-danger)' }};
-                                                    padding: var(--spacing-md);
-                                                    border-radius: var(--radius-sm);">
+                                            style="background: {{ $ticket->validation_status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}; border-left: 3px solid {{ $ticket->validation_status === 'approved' ? 'var(--accent-success)' : 'var(--accent-danger)' }}; padding: 16px; border-radius: 8px; color: var(--text-primary);">
                                             {{ $ticket->validation_notes }}
                                         </div>
                                     </div>
@@ -1345,7 +1218,7 @@
                                 @forelse($timeline as $item)
                                     <div class="timeline-item">
                                         <div class="timeline-icon"
-                                            style="background: {{ $item['color'] === 'primary' ? 'var(--gradient-cosmic)' : ($item['color'] === 'success' ? 'var(--gradient-success)' : ($item['color'] === 'warning' ? 'var(--gradient-warning)' : 'var(--gradient-danger)')) }};">
+                                            style="background: {{ $item['color'] === 'primary' ? 'linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%)' : ($item['color'] === 'success' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : ($item['color'] === 'warning' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)')) }};">
                                             <i class='bx {{ $item['icon'] }}'></i>
                                         </div>
                                         <div class="timeline-content">
@@ -1355,8 +1228,7 @@
                                                 <i class='bx bx-time'></i>
                                                 {{ $item['timestamp']->format('d M Y, H:i') }}
                                                 @if (isset($item['user']) && $item['user'])
-                                                    <br><i class='bx bx-user'></i>
-                                                    {{ $item['user']->name ?? '-' }}
+                                                    <br><i class='bx bx-user'></i> {{ $item['user']->name ?? '-' }}
                                                 @endif
                                             </div>
                                         </div>
@@ -1379,209 +1251,160 @@
     @include('pages.modul.service-request.modals.update-status')
     @include('pages.modul.service-request.modals.close')
 
-    <!-- jQuery -->
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Main Script -->
     <script>
         $(function() {
-            // ============================================
-            // APPROVE TICKET
-            // ============================================
-            $('#btn-approve').click(function() {
-                $('#modal-approve').modal('show');
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // Approve
+            $('#btn-approve').click(function(e) {
+                e.preventDefault();
+                new bootstrap.Modal($('#modal-approve')[0]).show();
             });
 
             $('#form-approve').submit(function(e) {
                 e.preventDefault();
-
+                const $btn = $('#btn-submit-approve');
                 $.ajax({
                     url: '/service-request/ticket/{{ $ticket->ticket_number }}/approve',
                     type: 'POST',
                     data: $(this).serialize(),
-                    beforeSend: function() {
-                        $('#btn-submit-approve').prop('disabled', true).html(
-                            '<i class="bx bx-loader-alt bx-spin"></i> Processing...');
-                    },
-                    success: function(response) {
-                        $('#modal-approve').modal('hide');
+                    beforeSend: () => $btn.prop('disabled', true).html(
+                        '<i class="bx bx-loader-alt bx-spin"></i> Processing...'),
+                    success: (res) => {
+                        bootstrap.Modal.getInstance($('#modal-approve')[0]).hide();
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
-                            text: response.message,
-                            iconColor: 'var(--accent-success)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        }).then(() => {
-                            location.reload();
-                        });
+                            text: res.message
+                        }).then(() => location.reload());
                     },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: xhr.responseJSON?.message || 'Something went wrong',
-                            iconColor: 'var(--accent-danger)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        });
-                    },
-                    complete: function() {
-                        $('#btn-submit-approve').prop('disabled', false).html(
-                            '<i class="bx bx-check-circle"></i> Approve');
-                    }
+                    error: (xhr) => Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Failed'
+                    }),
+                    complete: () => $btn.prop('disabled', false).html(
+                        '<i class="bx bx-check-circle"></i> Approve')
                 });
             });
 
-            // ============================================
-            // REJECT TICKET
-            // ============================================
-            $('#btn-reject').click(function() {
-                $('#modal-reject').modal('show');
+            // Reject
+            $('#btn-reject').click(function(e) {
+                e.preventDefault();
+                new bootstrap.Modal($('#modal-reject')[0]).show();
             });
 
             $('#form-reject').submit(function(e) {
                 e.preventDefault();
-
+                const $btn = $('#btn-submit-reject');
                 $.ajax({
                     url: '/service-request/ticket/{{ $ticket->ticket_number }}/reject',
                     type: 'POST',
                     data: $(this).serialize(),
-                    beforeSend: function() {
-                        $('#btn-submit-reject').prop('disabled', true).html(
-                            '<i class="bx bx-loader-alt bx-spin"></i> Processing...');
-                    },
-                    success: function(response) {
-                        $('#modal-reject').modal('hide');
+                    beforeSend: () => $btn.prop('disabled', true).html(
+                        '<i class="bx bx-loader-alt bx-spin"></i> Processing...'),
+                    success: (res) => {
+                        bootstrap.Modal.getInstance($('#modal-reject')[0]).hide();
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
-                            text: response.message,
-                            iconColor: 'var(--accent-success)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        }).then(() => {
-                            location.reload();
-                        });
+                            text: res.message
+                        }).then(() => location.reload());
                     },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: xhr.responseJSON?.message || 'Something went wrong',
-                            iconColor: 'var(--accent-danger)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        });
-                    },
-                    complete: function() {
-                        $('#btn-submit-reject').prop('disabled', false).html(
-                            '<i class="bx bx-x-circle"></i> Reject');
-                    }
+                    error: (xhr) => Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Failed'
+                    }),
+                    complete: () => $btn.prop('disabled', false).html(
+                        '<i class="bx bx-x-circle"></i> Reject')
                 });
             });
 
-            // ============================================
-            // ASSIGN TICKET
-            // ============================================
-            $('#btn-assign, #btn-reassign').click(function() {
-                $('#modal-assign').modal('show');
+            // Assign
+            $('#btn-assign, #btn-reassign').click(function(e) {
+                e.preventDefault();
+                new bootstrap.Modal($('#modal-assign')[0]).show();
             });
 
             $('#form-assign').submit(function(e) {
                 e.preventDefault();
-
+                const $btn = $('#btn-submit-assign');
                 $.ajax({
                     url: '/service-request/ticket/{{ $ticket->ticket_number }}/assign',
                     type: 'POST',
                     data: $(this).serialize(),
-                    beforeSend: function() {
-                        $('#btn-submit-assign').prop('disabled', true).html(
-                            '<i class="bx bx-loader-alt bx-spin"></i> Processing...');
-                    },
-                    success: function(response) {
-                        $('#modal-assign').modal('hide');
+                    beforeSend: () => $btn.prop('disabled', true).html(
+                        '<i class="bx bx-loader-alt bx-spin"></i> Processing...'),
+                    success: (res) => {
+                        bootstrap.Modal.getInstance($('#modal-assign')[0]).hide();
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
-                            text: response.message,
-                            iconColor: 'var(--accent-success)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        }).then(() => {
-                            location.reload();
-                        });
+                            text: res.message
+                        }).then(() => location.reload());
                     },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: xhr.responseJSON?.message || 'Something went wrong',
-                            iconColor: 'var(--accent-danger)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        });
-                    },
-                    complete: function() {
-                        $('#btn-submit-assign').prop('disabled', false).html(
-                            '<i class="bx bx-user-check"></i> Assign');
-                    }
+                    error: (xhr) => Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Failed'
+                    }),
+                    complete: () => $btn.prop('disabled', false).html(
+                        '<i class="bx bx-user-check"></i> Assign')
                 });
             });
 
-            // ============================================
-            // UPDATE STATUS
-            // ============================================
-            $('#btn-update-status').click(function() {
-                $('#modal-update-status').modal('show');
+            // Update Status
+            $('#btn-update-status').click(function(e) {
+                e.preventDefault();
+                new bootstrap.Modal($('#modal-update-status')[0]).show();
             });
 
             $('#form-update-status').submit(function(e) {
                 e.preventDefault();
-
+                const $btn = $('#btn-submit-status');
                 $.ajax({
                     url: '/service-request/ticket/{{ $ticket->ticket_number }}/update-status',
                     type: 'POST',
                     data: $(this).serialize(),
-                    beforeSend: function() {
-                        $('#btn-submit-status').prop('disabled', true).html(
-                            '<i class="bx bx-loader-alt bx-spin"></i> Processing...');
-                    },
-                    success: function(response) {
-                        $('#modal-update-status').modal('hide');
+                    beforeSend: () => $btn.prop('disabled', true).html(
+                        '<i class="bx bx-loader-alt bx-spin"></i> Processing...'),
+                    success: (res) => {
+                        bootstrap.Modal.getInstance($('#modal-update-status')[0]).hide();
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
-                            text: response.message,
-                            iconColor: 'var(--accent-success)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        }).then(() => {
-                            location.reload();
-                        });
+                            text: res.message
+                        }).then(() => location.reload());
                     },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: xhr.responseJSON?.message || 'Something went wrong',
-                            iconColor: 'var(--accent-danger)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        });
-                    },
-                    complete: function() {
-                        $('#btn-submit-status').prop('disabled', false).html(
-                            '<i class="bx bx-edit"></i> Update');
-                    }
+                    error: (xhr) => Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Failed'
+                    }),
+                    complete: () => $btn.prop('disabled', false).html(
+                        '<i class="bx bx-edit"></i> Update')
                 });
             });
 
-            // ============================================
-            // CLOSE TICKET
-            // ============================================
-            $('#btn-close').click(function() {
-                $('#modal-close').modal('show');
+            // Close
+            $('#btn-close').click(function(e) {
+                e.preventDefault();
+                new bootstrap.Modal($('#modal-close')[0]).show();
             });
 
             $('#form-close').submit(function(e) {
                 e.preventDefault();
-
+                const $btn = $('#btn-submit-close');
                 $.ajax({
                     url: '/service-request/ticket/{{ $ticket->ticket_number }}/update-status',
                     type: 'POST',
@@ -1590,44 +1413,31 @@
                         status: 'Closed',
                         notes: $('#close_notes').val()
                     },
-                    beforeSend: function() {
-                        $('#btn-submit-close').prop('disabled', true).html(
-                            '<i class="bx bx-loader-alt bx-spin"></i> Processing...');
-                    },
-                    success: function(response) {
-                        $('#modal-close').modal('hide');
+                    beforeSend: () => $btn.prop('disabled', true).html(
+                        '<i class="bx bx-loader-alt bx-spin"></i> Processing...'),
+                    success: () => {
+                        bootstrap.Modal.getInstance($('#modal-close')[0]).hide();
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
-                            text: 'Ticket closed successfully',
-                            iconColor: 'var(--accent-success)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        }).then(() => {
-                            location.reload();
-                        });
+                            text: 'Ticket closed'
+                        }).then(() => location.reload());
                     },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: xhr.responseJSON?.message || 'Something went wrong',
-                            iconColor: 'var(--accent-danger)',
-                            confirmButtonColor: 'var(--accent-primary)'
-                        });
-                    },
-                    complete: function() {
-                        $('#btn-submit-close').prop('disabled', false).html(
-                            '<i class="bx bx-check-double"></i> Close');
-                    }
+                    error: (xhr) => Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Failed'
+                    }),
+                    complete: () => $btn.prop('disabled', false).html(
+                        '<i class="bx bx-check-double"></i> Close')
                 });
             });
 
-            // ============================================
-            // INITIALIZATION LOG
-            // ============================================
-            // console.log('%c🎫 Ticket Detail - {{ $ticket->ticket_number }}',
-            //     'font-size: 20px; font-weight: bold; color: #00d4ff;');
-            // console.log('%c✨ Cosmic Theme Active', 'font-size: 14px; color: #7c3aed;');
+            // Cleanup modals
+            $('.modal').on('hidden.bs.modal', function() {
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            });
         });
     </script>
 </body>
