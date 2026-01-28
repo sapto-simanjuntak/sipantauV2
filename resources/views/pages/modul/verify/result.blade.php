@@ -1,4 +1,4 @@
-{{-- resources/views/verify/result.blade.php --}}
+{{-- resources/views/pages/modul/verify/result.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -308,6 +308,89 @@
                                 </div>
                             @endif
 
+                            {{-- ✅ WARNING: Must Compare with Document --}}
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl">
+                                <h4 class="font-bold text-yellow-800 mb-3 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Important Verification Notice
+                                </h4>
+                                <p class="text-sm text-yellow-700 mb-3">
+                                    To ensure document authenticity, <strong>compare the information shown above with
+                                        the
+                                        printed document</strong>:
+                                </p>
+                                <ul class="text-sm text-yellow-700 space-y-2 list-disc list-inside">
+                                    <li>Verify the signer name matches the document</li>
+                                    <li>Verify the signed date/time matches the document</li>
+                                    <li>If any information differs, the document may have been tampered with</li>
+                                </ul>
+                                <div class="mt-4 bg-yellow-100 rounded-lg p-3">
+                                    <p class="text-xs text-yellow-800 font-semibold">
+                                        ⚠️ If discrepancies are found, report immediately to IT Support: (021)
+                                        1234-5678
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- ✅ CHECKLIST: What to Verify --}}
+                            <div class="bg-blue-50 rounded-xl p-6">
+                                <h4 class="font-bold text-blue-800 mb-4 flex items-center">
+                                    <i class="fas fa-tasks mr-2"></i>
+                                    Document Verification Checklist
+                                </h4>
+
+                                <div class="space-y-3">
+                                    <label
+                                        class="flex items-start space-x-3 cursor-pointer hover:bg-blue-100 p-2 rounded-lg transition-all">
+                                        <input type="checkbox" class="mt-1 w-5 h-5 text-blue-600 rounded">
+                                        <span class="text-sm text-gray-700">
+                                            <strong>Name matches:</strong>
+                                            Confirmed "<span
+                                                class="text-blue-800 font-semibold">{{ $result['details']['signer_name'] ?? 'N/A' }}</span>"
+                                            is shown on the printed
+                                            document
+                                        </span>
+                                    </label>
+
+                                    <label
+                                        class="flex items-start space-x-3 cursor-pointer hover:bg-blue-100 p-2 rounded-lg transition-all">
+                                        <input type="checkbox" class="mt-1 w-5 h-5 text-blue-600 rounded">
+                                        <span class="text-sm text-gray-700">
+                                            <strong>Date/Time matches:</strong>
+                                            Confirmed "<span
+                                                class="text-blue-800 font-semibold">{{ $result['details']['signed_at'] ?? 'N/A' }}</span>"
+                                            is shown on the printed
+                                            document
+                                        </span>
+                                    </label>
+
+                                    <label
+                                        class="flex items-start space-x-3 cursor-pointer hover:bg-blue-100 p-2 rounded-lg transition-all">
+                                        <input type="checkbox" class="mt-1 w-5 h-5 text-blue-600 rounded">
+                                        <span class="text-sm text-gray-700">
+                                            <strong>Ticket number matches:</strong>
+                                            Confirmed ticket number is correct on the document
+                                        </span>
+                                    </label>
+
+                                    <label
+                                        class="flex items-start space-x-3 cursor-pointer hover:bg-blue-100 p-2 rounded-lg transition-all">
+                                        <input type="checkbox" class="mt-1 w-5 h-5 text-blue-600 rounded">
+                                        <span class="text-sm text-gray-700">
+                                            <strong>QR code quality:</strong>
+                                            QR code is clear and not manually replaced
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="mt-4 pt-4 border-t border-blue-200">
+                                    <p class="text-xs text-blue-700 flex items-center">
+                                        <i class="fas fa-shield-alt mr-2"></i>
+                                        All items must be checked to confirm document authenticity
+                                    </p>
+                                </div>
+                            </div>
+
                         </div>
                     @elseif($result['status'] === 'valid' && isset($result['is_placeholder']))
                         {{-- PLACEHOLDER (Pending/In Progress) --}}
@@ -403,8 +486,10 @@
                     @endif
 
                 </div>
+                {{-- END: Details Section --}}
 
             </div>
+            {{-- END: Result Card --}}
 
             {{-- Action Buttons --}}
             <div class="mt-8 flex gap-4 justify-center no-print">

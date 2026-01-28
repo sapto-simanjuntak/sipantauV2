@@ -104,36 +104,29 @@ Route::group(['middleware' => ['role:superadmin|admin|unit|user']], function () 
 });
 
 Route::prefix('service-request')->group(function () {
-    // List & Create
     Route::get('/', [ServiceRequestController::class, 'index'])->name('service.index');
     Route::get('/create', [ServiceRequestController::class, 'create'])->name('service.create');
     Route::post('/', [ServiceRequestController::class, 'store'])->name('service.store');
-    // ✅ Ticket Detail Routes (NO REGEX - accept any format)
-    Route::get('/ticket/{ticket_number}', [ServiceRequestController::class, 'show'])
-        ->name('service.show');
-    Route::get('/ticket/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])
-        ->name('service.edit');
-    Route::put('/ticket/{ticket_number}', [ServiceRequestController::class, 'update'])
-        ->name('service.update');
-    Route::delete('/ticket/{ticket_number}', [ServiceRequestController::class, 'destroy'])
-        ->name('service.destroy');
-    // Admin Actions (AJAX)
-    Route::post('/ticket/{ticket_number}/approve', [ServiceRequestController::class, 'approve'])
-        ->name('service.approve');
-    Route::post('/ticket/{ticket_number}/reject', [ServiceRequestController::class, 'reject'])
-        ->name('service.reject');
-    Route::post('/ticket/{ticket_number}/assign', [ServiceRequestController::class, 'assign'])
-        ->name('service.assign');
-    Route::post('/ticket/{ticket_number}/update-status', [ServiceRequestController::class, 'updateStatus'])
-        ->name('service.updateStatus');
 
-    Route::get('/service-request/ticket/{ticketNumber}/print', [ServiceRequestController::class, 'printTicket'])
-        ->name('service.print');
+    Route::get('/ticket/{ticket_number}', [ServiceRequestController::class, 'show'])->name('service.show');
+    Route::get('/ticket/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
+    Route::put('/ticket/{ticket_number}', [ServiceRequestController::class, 'update'])->name('service.update');
+    Route::delete('/ticket/{ticket_number}', [ServiceRequestController::class, 'destroy'])->name('service.destroy');
+
+    // ✅ PRINT TICKET (QR Code)
+    Route::get('/ticket/{ticket_number}/print', [ServiceRequestController::class, 'printTicket'])->name('service.print');
+
+    Route::post('/ticket/{ticket_number}/approve', [ServiceRequestController::class, 'approve'])->name('service.approve');
+    Route::post('/ticket/{ticket_number}/reject', [ServiceRequestController::class, 'reject'])->name('service.reject');
+    Route::post('/ticket/{ticket_number}/assign', [ServiceRequestController::class, 'assign'])->name('service.assign');
+    Route::post('/ticket/{ticket_number}/update-status', [ServiceRequestController::class, 'updateStatus'])->name('service.updateStatus');
 });
 
-Route::get('/test-qr', function () {
-    $controller = new \App\Http\Controllers\Support\ServiceRequestController();
-    return $controller->printTicket('TKT-20250127-0001'); // ganti dengan ticket number yang valid
+Route::prefix('verify')->name('verify.')->group(function () {
+    Route::get('/', [SignatureVerificationController::class, 'index'])->name('index');
+    Route::get('/qr/{data}', [SignatureVerificationController::class, 'verifyFromQr'])->name('qr');
+    Route::post('/manual', [SignatureVerificationController::class, 'verifyManual'])->name('manual');
+    Route::get('/history/{ticketNumber}', [SignatureVerificationController::class, 'history'])->name('history');
 });
 
 // AJAX ROUTES
@@ -142,11 +135,4 @@ Route::prefix('ajax')->group(function () {
     Route::get('/problem-categories', [AjaxController::class, 'getProblemCategories']);
     Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories']);
     Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
-});
-
-Route::prefix('verify')->name('verify.')->group(function () {
-    Route::get('/', [SignatureVerificationController::class, 'index'])->name('index');
-    Route::get('/qr/{data}', [SignatureVerificationController::class, 'verifyFromQr'])->name('qr');
-    Route::post('/manual', [SignatureVerificationController::class, 'verifyManual'])->name('manual');
-    Route::get('/history/{ticketNumber}', [SignatureVerificationController::class, 'history'])->name('history');
 });

@@ -1213,9 +1213,4 @@ class ServiceRequestController extends Controller
 
         return $timeline->sortBy('timestamp');
     }
-
-    /**
-     * Generate QR Codes untuk Requester, Technician, dan Validator
-     * FIXED VERSION - Semua 3 QR code akan selalu muncul
-     */
 }
