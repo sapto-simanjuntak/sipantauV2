@@ -26,11 +26,20 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ServiceRequestController extends Controller
 {
-    // ============================================
-    // INDEX - DATATABLE
-    // ============================================
+
     public function index()
     {
+        $user = auth()->user();
+        $role = $user->getRoleNames()->first();
+        $role = $role ? strtolower($role) : 'user';
+
+        Log::info('User Role Debug', [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'role' => $role,
+            'all_roles' => $user->getRoleNames()->toArray(),
+        ]);
+
         if (request()->ajax()) {
             try {
                 $query = ServiceRequest::with([
@@ -38,27 +47,46 @@ class ServiceRequestController extends Controller
                     'hospitalUnit:id,unit_code,unit_name,unit_type',
                     'problemCategory:id,category_name,category_code',
                     'problemSubCategory:id,sub_category_name',
-                    'assignedTechnician:id,name',
+                    'assignedTechnician:id,name', // Relationship name tetap
                 ]);
 
+                // ✅ FILTER BERDASARKAN ROLE
+                if ($user->hasRole(['admin', 'superadmin', 'super admin'])) {
+                    // Admin & Superadmin bisa lihat semua tiket
+
+                } elseif ($user->hasRole(['technician', 'teknisi'])) {
+                    // ✅ FIX: Ganti ke 'assigned_to'
+                    $query->where('assigned_to', $user->id);
+                } elseif ($user->hasRole(['user', 'pegawai', 'staff'])) {
+                    $query->where('user_id', $user->id);
+                } else {
+                    Log::warning('User without recognized role, defaulting to user view', [
+                        'user_id' => $user->id,
+                        'roles' => $user->getRoleNames()->toArray()
+                    ]);
+                    $query->where('user_id', $user->id);
+                    $role = 'user';
+                }
+
                 // ✅ APPLY FILTERS
-                if (request()->filled('filter_unit')) {
-                    $query->where('unit_id', request('filter_unit'));
-                }
-                if (request()->filled('filter_category')) {
-                    $query->where('problem_category_id', request('filter_category'));
-                }
-                if (request()->filled('filter_status')) {
-                    $query->where('ticket_status', request('filter_status'));
-                }
-                if (request()->filled('filter_priority')) {
-                    $query->where('priority', request('filter_priority'));
+                if ($user->hasAnyRole(['admin', 'superadmin', 'super admin', 'technician', 'teknisi'])) {
+                    if (request()->filled('filter_unit')) {
+                        $query->where('unit_id', request('filter_unit'));
+                    }
+                    if (request()->filled('filter_category')) {
+                        $query->where('problem_category_id', request('filter_category'));
+                    }
+                    if (request()->filled('filter_status')) {
+                        $query->where('ticket_status', request('filter_status'));
+                    }
+                    if (request()->filled('filter_priority')) {
+                        $query->where('priority', request('filter_priority'));
+                    }
                 }
 
                 return DataTables::of($query)
                     ->addIndexColumn()
 
-                    // ✅ TICKET NUMBER + CREATED DATE (with URL encoding)
                     ->addColumn('ticket_number', function ($pro) {
                         $html = '<div class="d-flex flex-column">';
                         $html .= '<a href="' . route('service.show', ['ticket_number' => $pro->ticket_number]) . '" class="fw-bold text-primary text-decoration-none">' .
@@ -69,8 +97,11 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ REQUESTER INFO (Name + Phone + Email)
-                    ->addColumn('requester', function ($pro) {
+                    ->addColumn('requester', function ($pro) use ($user) {
+                        if ($user->hasRole(['user', 'pegawai', 'staff'])) {
+                            return null;
+                        }
+
                         $html = '<div class="d-flex flex-column" style="min-width: 180px;">';
                         $html .= '<span class="fw-semibold">' . htmlspecialchars($pro->requester_name, ENT_QUOTES, 'UTF-8') . '</span>';
 
@@ -89,7 +120,6 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ UNIT + LOCATION
                     ->addColumn('unit', function ($pro) {
                         if (!$pro->hospitalUnit) {
                             return '<span class="text-muted">-</span>';
@@ -110,7 +140,6 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ ISSUE TITLE (Truncated)
                     ->addColumn('issue_title', function ($pro) {
                         $maxLength = 50;
                         $title = htmlspecialchars($pro->issue_title, ENT_QUOTES, 'UTF-8');
@@ -124,7 +153,6 @@ class ServiceRequestController extends Controller
                         return '<span>' . $title . '</span>';
                     })
 
-                    // ✅ CATEGORY + SUB-CATEGORY
                     ->addColumn('category', function ($pro) {
                         if (!$pro->problemCategory) {
                             return '<span class="text-muted">-</span>';
@@ -156,7 +184,6 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ DEVICE INFO (device_affected + IP + Connection)
                     ->addColumn('device_info', function ($pro) {
                         $html = '<div class="d-flex flex-column" style="min-width: 150px;">';
 
@@ -186,7 +213,6 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ SEVERITY LEVEL
                     ->addColumn('severity_level', function ($pro) {
                         $severityColors = [
                             'Kritis' => 'danger',
@@ -197,9 +223,8 @@ class ServiceRequestController extends Controller
 
                         $color = $severityColors[$pro->severity_level] ?? 'secondary';
 
-                        $html = '<span class="badge bg-' . $color . '">' . $pro->severity_level . '</span>';
+                        $html = '<span class="badge bg-' . $color . '">' . htmlspecialchars($pro->severity_level) . '</span>';
 
-                        // Tambah indicator patient impact
                         if ($pro->impact_patient_care) {
                             $html .= '<br><small class="badge bg-danger mt-1 impact-patient">' .
                                 '<i class="bx bx-error-circle me-1"></i>Patient Impact</small>';
@@ -208,7 +233,6 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ PRIORITY
                     ->addColumn('priority', function ($pro) {
                         $priorityColors = [
                             'Critical' => 'danger',
@@ -218,10 +242,9 @@ class ServiceRequestController extends Controller
                         ];
 
                         $color = $priorityColors[$pro->priority] ?? 'secondary';
-                        return '<span class="badge bg-' . $color . '">' . $pro->priority . '</span>';
+                        return '<span class="badge bg-' . $color . '">' . htmlspecialchars($pro->priority) . '</span>';
                     })
 
-                    // ✅ STATUS
                     ->addColumn('status', function ($pro) {
                         $statusColors = [
                             'Open' => 'primary',
@@ -236,19 +259,17 @@ class ServiceRequestController extends Controller
 
                         $color = $statusColors[$pro->ticket_status] ?? 'secondary';
 
-                        $html = '<span class="badge bg-' . $color . '">' . $pro->ticket_status . '</span>';
+                        $html = '<span class="badge bg-' . $color . '">' . htmlspecialchars($pro->ticket_status) . '</span>';
 
-                        // Tambah assigned info
                         if ($pro->assignedTechnician) {
                             $html .= '<br><small class="text-muted mt-1">' .
-                                htmlspecialchars($pro->assignedTechnician->name . ' ' . $pro->assignedTechnician->name, ENT_QUOTES, 'UTF-8') .
+                                htmlspecialchars($pro->assignedTechnician->name, ENT_QUOTES, 'UTF-8') .
                                 '</small>';
                         }
 
                         return $html;
                     })
 
-                    // ✅ SLA INDICATOR
                     ->addColumn('sla', function ($pro) {
                         if (!$pro->sla_deadline) {
                             return '<span class="text-muted">-</span>';
@@ -282,7 +303,6 @@ class ServiceRequestController extends Controller
                         return $html;
                     })
 
-                    // ✅ OCCURRENCE TIME
                     ->addColumn('occurrence_time', function ($pro) {
                         if (!$pro->occurrence_time) {
                             return '<span class="text-muted">-</span>';
@@ -295,32 +315,8 @@ class ServiceRequestController extends Controller
                             '</div>';
                     })
 
-                    // ✅ ACTION COLUMN (with URL encoding)
-                    ->addColumn('action', function ($pro) {
-                        $html = '<div class="btn-group" role="group">';
-
-                        // Detail Button
-                        $html .= '<a href="' . route('service.show', ['ticket_number' => $pro->ticket_number]) . '"
-                                class="btn btn-sm btn-info" title="Detail">
-                                <i class="bx bx-show"></i></a>';
-
-                        // Edit Button (only if not closed/rejected)
-                        if (!in_array($pro->ticket_status, ['Closed', 'Rejected'])) {
-                            $html .= '<a href="' . route('service.edit', ['ticket_number' => $pro->ticket_number]) . '"
-                                    class="btn btn-sm btn-warning" title="Edit">
-                                    <i class="bx bx-edit"></i></a>';
-                        }
-
-                        // Delete Button (only if Open/Pending)
-                        if (in_array($pro->ticket_status, ['Open', 'Pending'])) {
-                            $html .= '<button type="button" class="btn btn-sm btn-danger delete"
-                                    data-ticket="' . htmlspecialchars($pro->ticket_number, ENT_QUOTES, 'UTF-8') . '"
-                                    title="Hapus">
-                                    <i class="bx bx-trash"></i></button>';
-                        }
-
-                        $html .= '</div>';
-                        return $html;
+                    ->addColumn('action', function ($pro) use ($user) {
+                        return $this->getActionButtons($pro, $user);
                     })
 
                     ->rawColumns([
@@ -348,9 +344,60 @@ class ServiceRequestController extends Controller
             }
         }
 
-        return view('pages.modul.service-request.index');
+        return view('pages.modul.service-request.index', [
+            'role' => $role,
+            'user' => $user
+        ]);
     }
-    // App/Http/Controllers/ServiceRequestController.php
+
+    // ✅ FIX: getActionButtons method
+    private function getActionButtons($ticket, $user)
+    {
+        $html = '<div class="btn-group" role="group">';
+
+        $html .= '<a href="' . route('service.show', ['ticket_number' => $ticket->ticket_number]) . '"
+            class="btn btn-sm btn-info" title="Detail">
+            <i class="bx bx-show"></i></a>';
+
+        if ($user->hasRole(['user', 'pegawai', 'staff'])) {
+            if (in_array($ticket->ticket_status, ['Open', 'Pending'])) {
+                $html .= '<a href="' . route('service.edit', ['ticket_number' => $ticket->ticket_number]) . '"
+                    class="btn btn-sm btn-warning" title="Edit">
+                    <i class="bx bx-edit"></i></a>';
+
+                $html .= '<button type="button" class="btn btn-sm btn-danger delete"
+                    data-ticket="' . htmlspecialchars($ticket->ticket_number, ENT_QUOTES, 'UTF-8') . '"
+                    title="Hapus">
+                    <i class="bx bx-trash"></i></button>';
+            }
+        } elseif ($user->hasRole(['technician', 'teknisi'])) {
+            // Teknisi hanya ada tombol detail
+        } elseif ($user->hasRole(['admin', 'superadmin', 'super admin'])) {
+            if (!in_array($ticket->ticket_status, ['Closed', 'Rejected'])) {
+                $html .= '<a href="' . route('service.edit', ['ticket_number' => $ticket->ticket_number]) . '"
+                    class="btn btn-sm btn-warning" title="Edit">
+                    <i class="bx bx-edit"></i></a>';
+            }
+
+            if (in_array($ticket->ticket_status, ['Open', 'Pending'])) {
+                $html .= '<button type="button" class="btn btn-sm btn-danger delete"
+                    data-ticket="' . htmlspecialchars($ticket->ticket_number, ENT_QUOTES, 'UTF-8') . '"
+                    title="Hapus">
+                    <i class="bx bx-trash"></i></button>';
+            }
+
+            // ✅ FIX: Ganti assigned_technician_id ke assigned_to
+            if (in_array($ticket->ticket_status, ['Open', 'Approved']) && !$ticket->assigned_to) {
+                $html .= '<button type="button" class="btn btn-sm btn-primary assign-ticket"
+                    data-ticket="' . htmlspecialchars($ticket->ticket_number, ENT_QUOTES, 'UTF-8') . '"
+                    title="Assign ke Teknisi">
+                    <i class="bx bx-user-plus"></i></button>';
+            }
+        }
+
+        $html .= '</div>';
+        return $html;
+    }
 
     public function create()
     {
@@ -425,11 +472,31 @@ class ServiceRequestController extends Controller
         // Create ticket
         $ticket = ServiceRequest::create($validated);
 
+        // ============================================
+        // ROLE-BASED REDIRECT
+        // ============================================
+        $user = Auth::user();
+        $redirectUrl = route('service.index'); // Default untuk admin/superadmin/teknisi
+
+        // Check if user role is 'user' (bukan admin/teknisi)
+        if ($user->hasRole('user') && !$user->hasAnyRole(['superadmin', 'admin', 'teknisi'])) {
+            $redirectUrl = route('ticket.index'); // Redirect ke user ticket page
+        }
+
+        // Log for debugging
+        Log::info('Ticket Created - Redirect Info', [
+            'ticket_number' => $ticketNumber,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'user_roles' => $user->roles->pluck('name')->toArray(),
+            'redirect_url' => $redirectUrl
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Tiket berhasil dibuat',
             'ticket_number' => $ticketNumber,
-            'redirect_url' => route('service.index')
+            'redirect_url' => $redirectUrl
         ]);
     }
 

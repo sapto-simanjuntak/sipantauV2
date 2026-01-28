@@ -189,7 +189,7 @@
                 </div>
 
                 {{-- ACTION BUTTONS --}}
-                <div class="card-body border-bottom bg-light">
+                {{-- <div class="card-body border-bottom bg-light">
                     <div class="d-flex gap-2 flex-wrap justify-content-center">
                         @role('superadmin|admin')
                             @if ($ticket->validation_status === 'pending' && in_array($ticket->ticket_status, ['Open', 'Pending']))
@@ -232,6 +232,74 @@
                                 <i class="bx bx-edit-alt me-1"></i>Edit
                             </a>
                         @endif
+                    </div>
+                </div> --}}
+                <div class="card-body border-bottom bg-light">
+                    <div class="d-flex gap-2 flex-wrap justify-content-center">
+
+                        {{-- ADMIN/SUPERADMIN BUTTONS --}}
+                        @role('superadmin|admin')
+                            @if ($ticket->validation_status === 'pending' && in_array($ticket->ticket_status, ['Open', 'Pending']))
+                                <button type="button" class="btn btn-success action-button" id="btn-approve">
+                                    <i class="bx bx-check-circle me-1"></i>Approve
+                                </button>
+                                <button type="button" class="btn btn-danger action-button" id="btn-reject">
+                                    <i class="bx bx-x-circle me-1"></i>Reject
+                                </button>
+                            @endif
+
+                            @if (in_array($ticket->ticket_status, ['Open', 'Pending', 'Approved']) && !$ticket->assigned_to)
+                                <button type="button" class="btn btn-primary action-button" id="btn-assign">
+                                    <i class="bx bx-user-check me-1"></i>Assign
+                                </button>
+                            @endif
+
+                            @if ($ticket->assigned_to && in_array($ticket->ticket_status, ['Assigned', 'In Progress']))
+                                <button type="button" class="btn btn-info action-button" id="btn-reassign">
+                                    <i class="bx bx-transfer me-1"></i>Re-assign
+                                </button>
+                            @endif
+
+                            @if (!in_array($ticket->ticket_status, ['Closed', 'Rejected']))
+                                <button type="button" class="btn btn-warning action-button" id="btn-update-status">
+                                    <i class="bx bx-edit me-1"></i>Update Status
+                                </button>
+                            @endif
+
+                            @if (in_array($ticket->ticket_status, ['Resolved']))
+                                <button type="button" class="btn btn-dark action-button" id="btn-close">
+                                    <i class="bx bx-check-double me-1"></i>Close Ticket
+                                </button>
+                            @endif
+                        @endrole
+
+                        {{-- TEKNISI BUTTONS --}}
+                        @role('teknisi')
+                            @if ($ticket->assigned_to === auth()->id() && !in_array($ticket->ticket_status, ['Closed', 'Rejected']))
+                                <button type="button" class="btn btn-warning action-button" id="btn-update-status">
+                                    <i class="bx bx-edit me-1"></i>Update Status
+                                </button>
+                            @endif
+                        @endrole
+
+                        {{-- EDIT BUTTON --}}
+                        @role('superadmin|admin|teknisi')
+                            {{-- Admin/Teknisi bisa edit kecuali closed/rejected --}}
+                            @if (!in_array($ticket->ticket_status, ['Closed', 'Rejected']))
+                                <a href="{{ route('service.edit', $ticket->ticket_number) }}"
+                                    class="btn btn-secondary action-button">
+                                    <i class="bx bx-edit-alt me-1"></i>Edit
+                                </a>
+                            @endif
+                        @else
+                            {{-- User biasa cuma bisa edit kalau validation_status masih pending --}}
+                            @if ($ticket->validation_status === 'pending')
+                                <a href="{{ route('service.edit', $ticket->ticket_number) }}"
+                                    class="btn btn-secondary action-button">
+                                    <i class="bx bx-edit-alt me-1"></i>Edit
+                                </a>
+                            @endif
+                        @endrole
                     </div>
                 </div>
             </div>

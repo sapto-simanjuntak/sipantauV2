@@ -27,6 +27,13 @@
                  <div class="menu-title">Request Perbaikan</div>
              </a>
          </li>
+         <li>
+             <a href="{{ route('ticket.index') }}">
+                 <div class="parent-icon"><i class='bx bx-book'></i>
+                 </div>
+                 <div class="menu-title">Request Mobile</div>
+             </a>
+         </li>
          <li class="menu-label">Pembuatan / Pengembangan Sistem / Data</li>
 
          <li>

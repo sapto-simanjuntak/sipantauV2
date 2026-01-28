@@ -26,6 +26,7 @@ use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Akses\PermissionController;
 use App\Http\Controllers\Project\FormulirController;
 use App\Http\Controllers\Project\DashboardController;
+use App\Http\Controllers\Support\UserTicketController;
 use App\Http\Controllers\Support\ServiceRequestController;
 use App\Http\Controllers\Support\SignatureVerificationController;
 
@@ -103,12 +104,22 @@ Route::group(['middleware' => ['role:superadmin|admin|unit|user']], function () 
     Route::post('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
+Route::get('/service-request/create', function () {
+    if (auth()->user()->hasRole(['user'])) {
+        return view('pages.modul.user-ticket.create'); // Mobile
+    }
+    return view('pages.modul.service-request.create'); // Desktop
+})->name('service.create');
+
+
 Route::prefix('service-request')->group(function () {
     Route::get('/', [ServiceRequestController::class, 'index'])->name('service.index');
-    Route::get('/create', [ServiceRequestController::class, 'create'])->name('service.create');
+
+    // Route::get('/create', [ServiceRequestController::class, 'create'])->name('service.create');
     Route::post('/', [ServiceRequestController::class, 'store'])->name('service.store');
 
     Route::get('/ticket/{ticket_number}', [ServiceRequestController::class, 'show'])->name('service.show');
+
     Route::get('/ticket/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
     Route::put('/ticket/{ticket_number}', [ServiceRequestController::class, 'update'])->name('service.update');
     Route::delete('/ticket/{ticket_number}', [ServiceRequestController::class, 'destroy'])->name('service.destroy');
@@ -136,3 +147,9 @@ Route::prefix('ajax')->group(function () {
     Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories']);
     Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
 });
+
+Route::get('/ticket-user', [UserTicketController::class, 'index'])->name('ticket.index');
+Route::get('/stats', [UserTicketController::class, 'getStats'])->name('stats');
+Route::get('/search', [UserTicketController::class, 'search'])->name('search');
+Route::get('/tickets', [UserTicketController::class, 'getTickets'])->name('tickets');
+Route::get('/ticket-mobile/{ticket_number}', [UserTicketController::class, 'show'])->name('ticket.show');
