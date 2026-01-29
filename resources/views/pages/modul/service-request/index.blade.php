@@ -129,7 +129,7 @@
                             <li class="breadcrumb-item active" aria-current="page">
                                 @if ($role === 'user')
                                     Tiket Saya
-                                @elseif(in_array($role, ['technician', 'teknisi']))
+                                @elseif(in_array($role, ['teknisi']))
                                     Tiket Assigned
                                 @else
                                     Daftar Tiket
@@ -206,9 +206,9 @@
 
             {{-- ✅ STATISTICS CARDS - Conditional berdasarkan Role --}}
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-3">
-                @if ($role === 'user')
-                    {{-- Stats untuk User --}}
-                    <div class="col">
+                {{-- @if ($role === 'user') --}}
+                {{-- Stats untuk User --}}
+                {{-- <div class="col">
                         <div class="card radius-10 border-start border-0 border-3 border-primary">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
@@ -267,10 +267,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @elseif(in_array($role, ['technician', 'teknisi']))
-                    {{-- Stats untuk Technician --}}
-                    <div class="col">
+                    </div> --}}
+                {{-- @elseif(in_array($role, ['technician', 'teknisi'])) --}}
+                {{-- Stats untuk Technician --}}
+                {{-- <div class="col">
                         <div class="card radius-10 border-start border-0 border-3 border-primary">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
@@ -330,69 +330,69 @@
                             </div>
                         </div>
                     </div>
-                @else
-                    {{-- Stats untuk Admin/Superadmin --}}
-                    <div class="col">
-                        <div class="card radius-10 border-start border-0 border-3 border-info">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <p class="mb-0 text-secondary">Open Tickets</p>
-                                        <h4 class="my-1 text-info" id="stat-open">0</h4>
-                                    </div>
-                                    <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto">
-                                        <i class='bx bx-task'></i>
-                                    </div>
+                @else --}}
+                {{-- Stats untuk Admin/Superadmin --}}
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-info">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">Open Tickets</p>
+                                    <h4 class="my-1 text-info" id="stat-open"></h4>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto">
+                                    <i class='bx bx-task'></i>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card radius-10 border-start border-0 border-3 border-warning">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <p class="mb-0 text-secondary">In Progress</p>
-                                        <h4 class="my-1 text-warning" id="stat-progress">0</h4>
-                                    </div>
-                                    <div class="widgets-icons-2 rounded-circle bg-gradient-bloody text-white ms-auto">
-                                        <i class='bx bx-time'></i>
-                                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-warning">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">In Progress</p>
+                                    <h4 class="my-1 text-warning" id="stat-progress"></h4>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-bloody text-white ms-auto">
+                                    <i class='bx bx-time'></i>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card radius-10 border-start border-0 border-3 border-success">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <p class="mb-0 text-secondary">Resolved</p>
-                                        <h4 class="my-1 text-success" id="stat-resolved">0</h4>
-                                    </div>
-                                    <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto">
-                                        <i class='bx bx-check-circle'></i>
-                                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">Resolved</p>
+                                    <h4 class="my-1 text-success" id="stat-resolved"></h4>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto">
+                                    <i class='bx bx-check-circle'></i>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card radius-10 border-start border-0 border-3 border-danger">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <p class="mb-0 text-secondary">Critical Priority</p>
-                                        <h4 class="my-1 text-danger" id="stat-critical">0</h4>
-                                    </div>
-                                    <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto">
-                                        <i class='bx bx-error'></i>
-                                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-danger">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">Critical Priority</p>
+                                    <h4 class="my-1 text-danger" id="stat-critical"></h4>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto">
+                                    <i class='bx bx-error'></i>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
+                </div>
+                {{-- @endif --}}
             </div>
 
             {{-- ✅ MAIN TABLE --}}
@@ -440,17 +440,20 @@
         var userRole = '{{ $role }}';
 
         $(function() {
+            console.log('Current user role:', userRole); // Debug
+
             // ============================================
             // INITIALIZE
             // ============================================
-            @if (in_array($role, ['technician', 'teknisi', 'admin', 'superadmin']))
+            @if (in_array($role, ['teknisi', 'admin', 'superadmin']))
                 loadFilterOptions();
             @endif
 
+            // ✅ Load statistics PERTAMA KALI
             loadStatistics();
 
             // ============================================
-            // LOAD FILTER OPTIONS - Hanya untuk Technician/Admin/Superadmin
+            // LOAD FILTER OPTIONS
             // ============================================
             function loadFilterOptions() {
                 // Load Units
@@ -470,91 +473,68 @@
             }
 
             // ============================================
-            // LOAD STATISTICS - Conditional berdasarkan Role
+            // LOAD STATISTICS
             // ============================================
             function loadStatistics() {
-                $.get('/ajax/ticket-statistics', function(data) {
-                    if (userRole === 'user') {
-                        // Stats untuk User
-                        $('#stat-open').text(data.user_open || 0);
-                        $('#stat-pending').text(data.user_pending || 0);
-                        $('#stat-progress').text(data.user_progress || 0);
-                        $('#stat-resolved').text(data.user_resolved || 0);
-                    } else if (userRole === 'technician' || userRole === 'teknisi') {
-                        // Stats untuk Technician
-                        $('#stat-assigned').text(data.tech_assigned || 0);
-                        $('#stat-progress').text(data.tech_progress || 0);
-                        $('#stat-resolved').text(data.tech_resolved || 0);
-                        $('#stat-overdue').text(data.tech_overdue || 0);
-                    } else {
-                        // Stats untuk Admin/Superadmin
-                        $('#stat-open').text(data.open || 0);
-                        $('#stat-progress').text(data.in_progress || 0);
-                        $('#stat-resolved').text(data.resolved || 0);
-                        $('#stat-critical').text(data.critical || 0);
+                $.ajax({
+                    url: '/ajax/ticket-statistics',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log('Statistics data received:', data); // Debug
+                        console.log('User role check:', userRole); // Debug
+
+                        // ✅ Normalize role untuk perbandingan
+                        const normalizedRole = userRole.toLowerCase().trim();
+
+                        if (normalizedRole === 'user') {
+                            // Stats untuk User
+                            $('#stat-open').text(data.user_open || 0);
+                            $('#stat-pending').text(data.user_pending || 0);
+                            $('#stat-progress').text(data.user_progress || 0);
+                            $('#stat-resolved').text(data.user_resolved || 0);
+
+                        } else if (normalizedRole === 'technician' || normalizedRole === 'teknisi') {
+                            // Stats untuk Technician
+                            $('#stat-assigned').text(data.tech_assigned || 0);
+                            $('#stat-progress').text(data.tech_progress || 0);
+                            $('#stat-resolved').text(data.tech_resolved || 0);
+                            $('#stat-overdue').text(data.tech_overdue || 0);
+
+                        } else {
+                            // Stats untuk Admin/Superadmin
+                            console.log('Loading admin stats:', {
+                                open: data.open,
+                                in_progress: data.in_progress,
+                                resolved: data.resolved,
+                                critical: data.critical
+                            }); // Debug
+
+                            $('#stat-open').text(data.open || 0);
+                            $('#stat-progress').text(data.in_progress || 0);
+                            $('#stat-resolved').text(data.resolved || 0);
+                            $('#stat-critical').text(data.critical || 0);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Failed to load statistics:', error);
+                        console.error('Response:', xhr.responseText);
+
+                        // ✅ Set ke 0 jika error
+                        $('#stat-open, #stat-progress, #stat-resolved, #stat-critical').text('0');
                     }
-                }).fail(function() {
-                    console.log('Failed to load statistics');
                 });
             }
 
             // ============================================
-            // HANDLE DELETE
+            // AUTO REFRESH STATISTICS - Every 30 seconds
             // ============================================
-            $(document).on('click', '.delete', function() {
-                var ticketNumber = $(this).data('ticket');
-
-                Swal.fire({
-                    title: 'Hapus Tiket?',
-                    text: 'Tiket ' + ticketNumber + ' akan dihapus permanen',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/service-request/' + ticketNumber,
-                            type: 'DELETE',
-                            data: {
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function(response) {
-                                Swal.fire('Berhasil!', 'Tiket berhasil dihapus',
-                                    'success');
-                                datatable.ajax.reload();
-                                loadStatistics();
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Gagal!', 'Gagal menghapus tiket', 'error');
-                            }
-                        });
-                    }
-                });
-            });
+            setInterval(function() {
+                loadStatistics();
+            }, 30000);
 
             // ============================================
-            // HANDLE FILTER - Hanya untuk Technician/Admin/Superadmin
-            // ============================================
-            @if (in_array($role, ['technician', 'teknisi', 'admin', 'superadmin']))
-                $('#filterForm').on('submit', function(e) {
-                    e.preventDefault();
-                    datatable.ajax.reload();
-                });
-
-                $('#reset_filter').on('click', function() {
-                    $('#filterForm')[0].reset();
-                    datatable.ajax.reload();
-                });
-            @endif
-
-            // ============================================
-            // DATATABLE - Conditional Columns berdasarkan Role
-            // ============================================
-            // ============================================
-            // DATATABLE - Conditional Columns berdasarkan Role
+            // DATATABLE COLUMNS
             // ============================================
             function getDataTableColumns() {
                 var columns = [{
@@ -625,8 +605,53 @@
                 ]);
             }
 
-            $(document).on("click", ".delete", function() {
+            // ============================================
+            // DATATABLE INITIALIZATION
+            // ============================================
+            var datatable = $('#crudTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ordering: true,
+                ajax: {
+                    url: '{!! url()->current() !!}',
+                    data: function(d) {
+                        @if (in_array($role, ['teknisi', 'admin', 'superadmin']))
+                            d.filter_unit = $('#filter_unit').val();
+                            d.filter_category = $('#filter_category').val();
+                            d.filter_status = $('#filter_status').val();
+                            d.filter_priority = $('#filter_priority').val();
+                        @endif
+                    }
+                },
+                columns: getDataTableColumns(),
+                order: [
+                    [1, 'desc']
+                ],
+                rowCallback: function(row, data) {
+                    var statusClass = 'row-' + data.ticket_status.toLowerCase().replace(/ /g, '-');
+                    $(row).addClass(statusClass);
+                }
+            });
 
+            // ============================================
+            // HANDLE FILTER
+            // ============================================
+            @if (in_array($role, ['teknisi', 'admin', 'superadmin']))
+                $('#filterForm').on('submit', function(e) {
+                    e.preventDefault();
+                    datatable.ajax.reload();
+                });
+
+                $('#reset_filter').on('click', function() {
+                    $('#filterForm')[0].reset();
+                    datatable.ajax.reload();
+                });
+            @endif
+
+            // ============================================
+            // HANDLE DELETE
+            // ============================================
+            $(document).on("click", ".delete", function() {
                 let ticketNumber = $(this).data("ticket");
                 let url = $(this).data("url");
 
@@ -639,9 +664,7 @@
                     cancelButtonColor: "#3085d6",
                     confirmButtonText: "Ya, Hapus!"
                 }).then((result) => {
-
                     if (result.isConfirmed) {
-
                         $.ajax({
                             url: url,
                             type: "DELETE",
@@ -651,45 +674,16 @@
                             success: function(res) {
                                 Swal.fire("Berhasil!", res.message, "success");
                                 datatable.ajax.reload();
+                                loadStatistics(); // ✅ Reload statistics after delete
                             },
                             error: function(xhr) {
                                 Swal.fire("Gagal!", "Tiket gagal dihapus", "error");
                             }
                         });
-
                     }
-
                 });
-
             });
 
-
-
-            var datatable = $('#crudTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ordering: true,
-                ajax: {
-                    url: '{!! url()->current() !!}',
-                    data: function(d) {
-                        @if (in_array($role, ['technician', 'teknisi', 'admin', 'superadmin']))
-                            d.filter_unit = $('#filter_unit').val();
-                            d.filter_category = $('#filter_category').val();
-                            d.filter_status = $('#filter_status').val();
-                            d.filter_priority = $('#filter_priority').val();
-                        @endif
-                    }
-                },
-                columns: getDataTableColumns(),
-                order: [
-                    [1, 'desc']
-                ], // Sort by ticket_number DESC
-                rowCallback: function(row, data) {
-                    // Add class based on ticket status
-                    var statusClass = 'row-' + data.ticket_status.toLowerCase().replace(/ /g, '-');
-                    $(row).addClass(statusClass);
-                }
-            });
         });
     </script>
 @endpush

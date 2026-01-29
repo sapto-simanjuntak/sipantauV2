@@ -14,6 +14,8 @@ class ServiceRequest extends Model
 {
     use HasFactory;
 
+    protected $table = 'service_requests';
+
     protected $fillable = [
         'ticket_number',
         'user_id',

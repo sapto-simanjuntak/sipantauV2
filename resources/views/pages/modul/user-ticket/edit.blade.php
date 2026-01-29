@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Buat Tiket IT - {{ config('app.name') }}</title>
+    <title>Edit Tiket IT - {{ config('app.name') }}</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -87,7 +87,7 @@
             position: fixed;
             inset: 0;
             z-index: 0;
-            background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 50%, #fae8ff 100%);
+            background: linear-gradient(135deg, #fef3c7 0%, #f1f5f9 50%, #fae8ff 100%);
             pointer-events: none;
         }
 
@@ -96,7 +96,7 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 20% 30%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
             animation: float 20s ease-in-out infinite;
         }
@@ -164,7 +164,7 @@
         .back-btn:active {
             transform: scale(0.92);
             background: var(--border-medium);
-            border-color: var(--primary);
+            border-color: var(--warning);
         }
 
         .app-title {
@@ -185,6 +185,17 @@
             margin: 2px 0 0 0;
         }
 
+        .ticket-badge {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
         /* ========================================
            MAIN CONTENT
            ======================================== */
@@ -195,6 +206,57 @@
             width: 100%;
             padding: 16px;
             padding-bottom: 90px;
+        }
+
+        /* ========================================
+           ALERT INFO
+           ======================================== */
+        .alert-info {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .alert-info i {
+            font-size: 20px;
+            color: var(--warning);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-info-content {
+            flex: 1;
+        }
+
+        .alert-info-content strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .alert-info-content p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(14, 165, 233, 0.15);
+            color: var(--primary);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 6px;
         }
 
         /* ========================================
@@ -232,7 +294,7 @@
             top: 14px;
             left: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, var(--warning), #d97706);
             transition: width 0.4s ease;
             z-index: 1;
         }
@@ -255,9 +317,9 @@
         }
 
         .progress-dot.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--warning), #d97706);
             border-color: transparent;
-            box-shadow: var(--shadow-glow);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
             color: white;
         }
 
@@ -327,14 +389,14 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--warning), #d97706);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
             color: white;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
         .card-title {
@@ -355,155 +417,71 @@
             margin: 2px 0 0 0;
         }
 
-        .card-title-simple {
-            margin-bottom: 16px;
-        }
-
-        .card-title-simple h3 {
-            font-size: 15px;
-            font-weight: 700;
-            margin: 0 0 4px 0;
-            color: var(--text-primary);
-        }
-
-        .card-title-simple p {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin: 0;
-        }
-
-        /* UPLOAD TITLE - SIMPLE & CLEAN */
-        .upload-title {
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .upload-title h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0 0 4px 0;
-        }
-
-        .upload-title p {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin: 0;
-        }
-
         /* ========================================
-           CATEGORY GRID
+           FORM ELEMENTS
            ======================================== */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+        .form-group {
+            margin-bottom: 14px;
         }
 
-        .category-item {
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 7px;
+            display: block;
+        }
+
+        .required-mark {
+            color: var(--danger);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 13px 15px;
             background: var(--bg-input);
             border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
-            padding: 18px 12px;
-            text-align: center;
-            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+            font-weight: 500;
         }
 
-        .category-item::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .category-item:active {
-            transform: scale(0.96);
-        }
-
-        .category-item.selected {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.25);
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.08);
             background: white;
         }
 
-        .category-item.selected::before {
-            opacity: 0.05;
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-muted);
         }
 
-        .category-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            position: relative;
-            z-index: 1;
-            color: white;
+        .form-textarea {
+            min-height: 110px;
+            resize: vertical;
         }
 
-        /* Category Colors */
-        .cat-hw {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
         }
 
-        .cat-sw {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-
-        .cat-net {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-        }
-
-        .cat-pabx {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .cat-cctv {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        .cat-ac {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
-        }
-
-        .cat-dev {
-            background: linear-gradient(135deg, #ec4899, #db2777);
-            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
-        }
-
-        .cat-email {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .category-name {
-            font-size: 13px;
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
-            color: var(--text-primary);
-        }
-
-        .category-desc {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-top: 3px;
-            position: relative;
-            z-index: 1;
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
         }
 
         /* ========================================
@@ -534,72 +512,9 @@
 
         .chip.selected {
             background: white;
-            border-color: var(--primary);
-            color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-
-        /* ========================================
-           FORM ELEMENTS
-           ======================================== */
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 7px;
-            display: block;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 13px 15px;
-            background: var(--bg-input);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
-            background: white;
-        }
-
-        .form-input::placeholder,
-        .form-textarea::placeholder {
-            color: var(--text-muted);
-        }
-
-        .form-textarea {
-            min-height: 110px;
-            resize: vertical;
-        }
-
-        .form-select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 40px;
-        }
-
-        .form-hint {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 5px;
+            border-color: var(--warning);
+            color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
         }
 
         /* ========================================
@@ -629,7 +544,6 @@
         .severity-item.selected {
             border-color: currentColor;
             background: white;
-            box-shadow: 0 0 0 3px currentColor;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
@@ -741,7 +655,7 @@
         }
 
         /* ========================================
-           CAMERA UPLOAD
+           FILE UPLOAD
            ======================================== */
         .camera-upload {
             width: 100%;
@@ -775,8 +689,6 @@
             margin-bottom: 10px;
             color: var(--text-muted);
             display: block;
-            width: 100%;
-            text-align: center;
         }
 
         .camera-upload.has-file i {
@@ -789,8 +701,6 @@
             font-weight: 600;
             margin: 0;
             color: var(--text-primary);
-            width: 100%;
-            text-align: center;
         }
 
         .camera-upload small {
@@ -798,8 +708,6 @@
             color: var(--text-muted);
             display: block;
             margin-top: 4px;
-            width: 100%;
-            text-align: center;
         }
 
         .file-preview {
@@ -846,6 +754,45 @@
             cursor: pointer;
         }
 
+        .current-file {
+            background: rgba(14, 165, 233, 0.08);
+            border: 2px solid rgba(14, 165, 233, 0.2);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .current-file i {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .current-file-text {
+            flex: 1;
+        }
+
+        .current-file-text strong {
+            display: block;
+            font-size: 12px;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .current-file-text small {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .current-file a {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
         /* ========================================
            SUMMARY
            ======================================== */
@@ -860,7 +807,7 @@
         .summary-title {
             font-size: 12px;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--warning);
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -963,9 +910,9 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--warning), #d97706);
             color: white;
-            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
         }
 
         .btn-secondary {
@@ -976,7 +923,7 @@
 
         .btn-secondary:hover {
             background: var(--bg-input);
-            border-color: var(--primary);
+            border-color: var(--warning);
         }
 
         .btn-success {
@@ -1011,7 +958,7 @@
             width: 44px;
             height: 44px;
             border: 4px solid var(--border-medium);
-            border-top-color: var(--primary);
+            border-top-color: var(--warning);
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
         }
@@ -1026,10 +973,6 @@
            RESPONSIVE
            ======================================== */
         @media (min-width: 640px) {
-            .category-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
             .chip-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -1071,18 +1014,29 @@
         <!-- App Bar -->
         <header class="app-bar">
             <div class="app-bar-content">
-                <button class="back-btn" onclick="window.history.back()">
+                <button class="back-btn" onclick="window.location.href='{{ route('ticket.index') }}'">
                     <i class='bx bx-arrow-back'></i>
                 </button>
                 <div class="app-title">
-                    <h1>Buat Tiket IT</h1>
-                    <p>Laporkan masalah Anda</p>
+                    <h1>Edit Tiket IT</h1>
+                    <p>Perbarui informasi tiket</p>
                 </div>
+                <div class="ticket-badge">{{ $ticket->ticket_number }}</div>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Alert Info -->
+            <div class="alert-info">
+                <i class='bx bx-info-circle'></i>
+                <div class="alert-info-content">
+                    <strong>Info Tiket</strong>
+                    <p>Status tiket saat ini</p>
+                    <span class="status-badge">{{ $ticket->ticket_status }}</span>
+                </div>
+            </div>
+
             <!-- Progress -->
             <div class="progress-card">
                 <div class="progress-dots">
@@ -1093,7 +1047,7 @@
                     <div class="progress-dot" id="dot4">4</div>
                 </div>
                 <div class="progress-labels">
-                    <span class="progress-label">Kategori</span>
+                    <span class="progress-label">Info</span>
                     <span class="progress-label">Detail</span>
                     <span class="progress-label">Lokasi</span>
                     <span class="progress-label">Review</span>
@@ -1103,34 +1057,58 @@
             <!-- Form -->
             <form id="ticketForm" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="requester_name" value="{{ Auth::user()->name }}">
-                <input type="hidden" name="requester_phone" id="hiddenPhone">
-                <input type="hidden" name="problem_category_id" id="categoryId">
-                <input type="hidden" name="problem_sub_category_id" id="subCategoryId">
-                <input type="hidden" name="severity_level" id="severityLevel">
-                <input type="hidden" name="impact_patient_care" id="impactCare" value="0">
+                <input type="hidden" name="problem_category_id" id="categoryId"
+                    value="{{ $ticket->problem_category_id }}">
+                <input type="hidden" name="problem_sub_category_id" id="subCategoryId"
+                    value="{{ $ticket->problem_sub_category_id }}">
+                <input type="hidden" name="severity_level" id="severityLevel" value="{{ $ticket->severity_level }}">
+                <input type="hidden" name="impact_patient_care" id="impactCare"
+                    value="{{ $ticket->impact_patient_care ? '1' : '0' }}">
 
-                <!-- Step 1: Kategori -->
+                <!-- Step 1: Info Pelapor -->
                 <section class="section active" id="step1">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
-                                <i class='bx bx-category'></i>
+                                <i class='bx bx-user'></i>
                             </div>
                             <div class="card-title">
-                                <h3>Pilih Kategori</h3>
-                                <p>Jenis masalah yang dialami</p>
+                                <h3>Info Pelapor</h3>
+                                <p>Data pelapor tiket</p>
                             </div>
                         </div>
-                        <div class="category-grid" id="categoryGrid">
-                            <!-- Populated by JS -->
+                        <div class="form-group">
+                            <label class="form-label">Nama Lengkap <span class="required-mark">*</span></label>
+                            <input type="text" class="form-input" name="requester_name"
+                                value="{{ $ticket->requester_name }}" required>
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">No. Telepon</label>
+                            <input type="tel" class="form-input" name="requester_phone"
+                                value="{{ $ticket->requester_phone }}" placeholder="08xxxxxxxxxx">
+                            <div class="form-hint">Untuk dihubungi teknisi</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class='bx bx-building'></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>Unit/Ruangan</h3>
+                                <p>Tempat Anda bekerja</p>
+                            </div>
+                        </div>
+                        <select class="form-select" name="unit_id" id="unitSelect" required>
+                            <option value="">Pilih unit...</option>
+                        </select>
                     </div>
                 </section>
 
-                <!-- Step 2: Detail -->
+                <!-- Step 2: Detail Masalah -->
                 <section class="section" id="step2">
-                    <!-- Sub-category -->
+                    <!-- Sub-category (if any) -->
                     <div class="card hidden" id="subCategoryCard">
                         <div class="card-header">
                             <div class="card-icon">
@@ -1138,13 +1116,12 @@
                             </div>
                             <div class="card-title">
                                 <h3>Detail Masalah</h3>
-                                <p>Pilih yang paling sesuai</p>
+                                <p>Pilih yang sesuai</p>
                             </div>
                         </div>
                         <div class="chip-grid" id="subCategoryGrid"></div>
                     </div>
 
-                    <!-- Judul -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
@@ -1156,10 +1133,9 @@
                             </div>
                         </div>
                         <input type="text" class="form-input" name="issue_title"
-                            placeholder="Contoh: PC tidak bisa nyala" required>
+                            value="{{ $ticket->issue_title }}" placeholder="Contoh: PC tidak bisa nyala" required>
                     </div>
 
-                    <!-- Deskripsi -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
@@ -1170,12 +1146,10 @@
                                 <p>Jelaskan detail masalahnya</p>
                             </div>
                         </div>
-                        <textarea class="form-textarea" name="description"
-                            placeholder="Apa yang terjadi? Kapan mulai? Apa yang sudah dicoba?" required></textarea>
+                        <textarea class="form-textarea" name="description" required>{{ $ticket->description }}</textarea>
                         <div class="form-hint">💡 Semakin detail, semakin cepat dibantu</div>
                     </div>
 
-                    <!-- Severity -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
@@ -1187,32 +1161,32 @@
                             </div>
                         </div>
                         <div class="severity-grid">
-                            <div class="severity-item severity-low" data-level="Rendah"
-                                onclick="selectSeverity('Rendah')">
+                            <div class="severity-item severity-low {{ $ticket->severity_level == 'Rendah' ? 'selected' : '' }}"
+                                data-level="Rendah" onclick="selectSeverity('Rendah')">
                                 <span class="severity-emoji">🟢</span>
                                 <div class="severity-text">
                                     <h4>Rendah</h4>
                                     <p>Tidak mendesak</p>
                                 </div>
                             </div>
-                            <div class="severity-item severity-med" data-level="Sedang"
-                                onclick="selectSeverity('Sedang')">
+                            <div class="severity-item severity-med {{ $ticket->severity_level == 'Sedang' ? 'selected' : '' }}"
+                                data-level="Sedang" onclick="selectSeverity('Sedang')">
                                 <span class="severity-emoji">🟡</span>
                                 <div class="severity-text">
                                     <h4>Sedang</h4>
                                     <p>Ada workaround</p>
                                 </div>
                             </div>
-                            <div class="severity-item severity-high" data-level="Tinggi"
-                                onclick="selectSeverity('Tinggi')">
+                            <div class="severity-item severity-high {{ $ticket->severity_level == 'Tinggi' ? 'selected' : '' }}"
+                                data-level="Tinggi" onclick="selectSeverity('Tinggi')">
                                 <span class="severity-emoji">🟠</span>
                                 <div class="severity-text">
                                     <h4>Tinggi</h4>
                                     <p>Ganggu operasional</p>
                                 </div>
                             </div>
-                            <div class="severity-item severity-critical" data-level="Kritis"
-                                onclick="selectSeverity('Kritis')">
+                            <div class="severity-item severity-critical {{ $ticket->severity_level == 'Kritis' ? 'selected' : '' }}"
+                                data-level="Kritis" onclick="selectSeverity('Kritis')">
                                 <span class="severity-emoji">🔴</span>
                                 <div class="severity-text">
                                     <h4>Kritis</h4>
@@ -1222,9 +1196,9 @@
                         </div>
                     </div>
 
-                    <!-- Impact Toggle -->
                     <div class="card">
-                        <div class="toggle-card" id="impactToggle" onclick="toggleImpact()">
+                        <div class="toggle-card {{ $ticket->impact_patient_care ? 'active' : '' }}" id="impactToggle"
+                            onclick="toggleImpact()">
                             <div class="toggle-left">
                                 <div class="toggle-icon">
                                     <i class='bx bx-heart'></i>
@@ -1235,8 +1209,7 @@
                         </div>
                     </div>
 
-                    <!-- Waktu - Hidden for DEV -->
-                    <div class="card" id="occurrenceCard">
+                    <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
                                 <i class='bx bx-time'></i>
@@ -1247,30 +1220,14 @@
                             </div>
                         </div>
                         <input type="datetime-local" class="form-input" name="occurrence_time" id="occurrenceTime"
+                            value="{{ \Carbon\Carbon::parse($ticket->occurrence_time)->format('Y-m-d\TH:i') }}"
                             required>
                     </div>
                 </section>
 
-                <!-- Step 3: Lokasi -->
+                <!-- Step 3: Lokasi & Lampiran -->
                 <section class="section" id="step3">
-                    <!-- Unit -->
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-icon">
-                                <i class='bx bx-building'></i>
-                            </div>
-                            <div class="card-title">
-                                <h3>Unit/Ruangan</h3>
-                                <p>Dimana Anda bekerja?</p>
-                            </div>
-                        </div>
-                        <select class="form-select" name="unit_id" id="unitSelect" required>
-                            <option value="">Pilih unit...</option>
-                        </select>
-                    </div>
-
-                    <!-- Lokasi - Hidden for DEV -->
-                    <div class="card" id="locationCard">
                         <div class="card-header">
                             <div class="card-icon">
                                 <i class='bx bx-map-pin'></i>
@@ -1280,12 +1237,11 @@
                                 <p>Lokasi detail dalam unit</p>
                             </div>
                         </div>
-                        <input type="text" class="form-input" name="location" id="locationInput"
+                        <input type="text" class="form-input" name="location" value="{{ $ticket->location }}"
                             placeholder="Contoh: Meja perawat" required>
                     </div>
 
-                    <!-- Device - Hidden for DEV -->
-                    <div class="card" id="deviceCard">
+                    <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
                                 <i class='bx bx-laptop'></i>
@@ -1295,8 +1251,8 @@
                                 <p>Nama/kode perangkat</p>
                             </div>
                         </div>
-                        <input type="text" class="form-input" name="device_affected" id="deviceInput"
-                            placeholder="Contoh: PC-IGD-01">
+                        <input type="text" class="form-input" name="device_affected"
+                            value="{{ $ticket->device_affected }}" placeholder="Contoh: PC-IGD-01">
                     </div>
 
                     <!-- Network (conditional) -->
@@ -1312,17 +1268,22 @@
                         </div>
                         <div class="form-group">
                             <input type="text" class="form-input" name="ip_address"
-                                placeholder="IP Address (192.168.x.x)">
+                                value="{{ $ticket->ip_address }}" placeholder="IP Address (192.168.x.x)">
                         </div>
                         <select class="form-select" name="connection_status">
                             <option value="">Status koneksi...</option>
-                            <option value="Tidak bisa connect">Tidak bisa connect</option>
-                            <option value="Koneksi lambat">Koneksi lambat</option>
-                            <option value="Putus-putus">Putus-putus</option>
+                            <option value="Tidak bisa connect"
+                                {{ $ticket->connection_status == 'Tidak bisa connect' ? 'selected' : '' }}>Tidak bisa
+                                connect</option>
+                            <option value="Koneksi lambat"
+                                {{ $ticket->connection_status == 'Koneksi lambat' ? 'selected' : '' }}>Koneksi lambat
+                            </option>
+                            <option value="Putus-putus"
+                                {{ $ticket->connection_status == 'Putus-putus' ? 'selected' : '' }}>Putus-putus
+                            </option>
                         </select>
                     </div>
 
-                    <!-- Expected Action -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
@@ -1333,10 +1294,9 @@
                                 <p>Apa yang perlu dilakukan?</p>
                             </div>
                         </div>
-                        <textarea class="form-textarea" name="expected_action" placeholder="Contoh: Perbaiki segera" required></textarea>
+                        <textarea class="form-textarea" name="expected_action" required>{{ $ticket->expected_action }}</textarea>
                     </div>
 
-                    <!-- Upload -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
@@ -1347,12 +1307,24 @@
                                 <p>Screenshot atau foto masalah</p>
                             </div>
                         </div>
-                        <input type="file" name="file_path" id="fileInput" accept="image/*" style="display:none"
-                            onchange="handleFile(this)">
+
+                        @if ($ticket->file_path)
+                            <div class="current-file">
+                                <i class='bx bx-file'></i>
+                                <div class="current-file-text">
+                                    <strong>File saat ini:</strong>
+                                    <small>{{ basename($ticket->file_path) }}</small>
+                                </div>
+                                <a href="{{ Storage::url($ticket->file_path) }}" target="_blank">Lihat</a>
+                            </div>
+                        @endif
+
+                        <input type="file" name="file_path" id="fileInput" accept="image/*,.pdf"
+                            style="display:none" onchange="handleFile(this)">
                         <label for="fileInput" class="camera-upload" id="cameraBtn">
                             <i class='bx bx-camera'></i>
-                            <p>Tap untuk Upload Foto</p>
-                            <small>Max 5MB • JPG, PNG</small>
+                            <p>Tap untuk Upload Foto Baru</p>
+                            <small>Max 5MB • JPG, PNG, PDF</small>
                         </label>
                         <div class="file-preview" id="filePreview">
                             <img id="previewImg" class="preview-img">
@@ -1364,20 +1336,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Phone -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-icon">
-                                <i class='bx bx-phone'></i>
-                            </div>
-                            <div class="card-title">
-                                <h3>No. Telepon (Opsional)</h3>
-                                <p>Untuk dihubungi teknisi</p>
-                            </div>
-                        </div>
-                        <input type="tel" class="form-input" id="phoneInput" placeholder="08xxxxxxxxxx">
                     </div>
                 </section>
 
@@ -1401,7 +1359,7 @@
                         <i class='bx bx-info-circle'></i>
                         <div>
                             <strong>Perhatian!</strong><br>
-                            Data akan langsung diteruskan ke tim IT
+                            Perubahan akan langsung tersimpan
                         </div>
                     </div>
                 </section>
@@ -1421,8 +1379,8 @@
                 </button>
                 <button type="button" class="btn btn-success btn-block hidden" id="submitBtn"
                     onclick="submitForm()">
-                    <i class='bx bx-send'></i>
-                    Kirim Tiket
+                    <i class='bx bx-save'></i>
+                    Update Tiket
                 </button>
             </div>
         </div>
@@ -1439,105 +1397,54 @@
 
     <script>
         let step = 1;
-        let selectedCat = null;
-        let selectedSub = null;
-        let currentCategoryCode = null; // ✅ Track selected category code
+        const ticketData = @json($ticket);
 
         $(function() {
-            loadCategories();
             loadUnits();
-            setTime();
+            loadSubCategories();
+            checkNetworkSection();
+            checkDevCategory();
         });
 
-        function loadCategories() {
-            $.get('/ajax/problem-categories', data => {
-                const icons = {
-                    HW: 'bx-chip',
-                    SW: 'bx-code-alt',
-                    NET: 'bx-wifi',
-                    PABX: 'bx-phone',
-                    CCTV: 'bx-video',
-                    AC: 'bx-wind',
-                    DEV: 'bx-rocket',
-                    EMAIL: 'bx-envelope'
-                };
-                const desc = {
-                    HW: 'PC, Printer',
-                    SW: 'Aplikasi',
-                    NET: 'Internet',
-                    PABX: 'Telepon',
-                    CCTV: 'Kamera',
-                    AC: 'AC',
-                    DEV: 'Fitur Baru',
-                    EMAIL: 'Email'
-                };
-                let html = '';
-                data.forEach(c => {
-                    html += `<div class="category-item" data-id="${c.id}" data-code="${c.category_code}" onclick="selectCat(${c.id},'${c.category_code}')">
-                        <div class="category-icon cat-${c.category_code.toLowerCase()}"><i class='bx ${icons[c.category_code]}'></i></div>
-                        <div class="category-name">${c.category_name}</div>
-                        <div class="category-desc">${desc[c.category_code]||''}</div>
-                    </div>`;
+        function loadUnits() {
+            $.get('/ajax/hospital-units', data => {
+                let html = '<option value="">Pilih unit...</option>';
+                data.forEach(u => {
+                    const selected = u.id == ticketData.unit_id ? 'selected' : '';
+                    html += `<option value="${u.id}" ${selected}>${u.unit_code} - ${u.unit_name}</option>`;
                 });
-                $('#categoryGrid').html(html);
+                $('#unitSelect').html(html);
             });
         }
 
-        function selectCat(id, code) {
-            selectedCat = id;
-            currentCategoryCode = code; // ✅ Store the category code
-            $('.category-item').removeClass('selected');
-            $(`.category-item[data-id="${id}"]`).addClass('selected');
-            $('#categoryId').val(id);
+        function loadSubCategories() {
+            if (!ticketData.problem_category_id) return;
 
-            $.get(`/ajax/sub-categories/${id}`, data => {
+            $.get(`/ajax/sub-categories/${ticketData.problem_category_id}`, data => {
                 if (data.length > 0) {
                     let html = '';
                     data.forEach(s => {
+                        const selected = s.id == ticketData.problem_sub_category_id ? 'selected' : '';
                         html +=
-                            `<div class="chip" data-id="${s.id}" onclick="selectSub(${s.id})">${s.sub_category_name}</div>`;
+                            `<div class="chip ${selected}" data-id="${s.id}" onclick="selectSub(${s.id})">${s.sub_category_name}</div>`;
                     });
                     $('#subCategoryGrid').html(html);
                     $('#subCategoryCard').removeClass('hidden');
-                } else {
-                    $('#subCategoryCard').addClass('hidden');
                 }
             });
-
-            // ✅ Show/hide network card for NET category
-            $('#networkCard').toggleClass('hidden', code !== 'NET');
-
-            // ✅ Show/hide DEV-specific fields
-            handleDevCategoryFields(code);
-
-            setTimeout(nextStep, 300);
         }
 
-        // ✅ NEW FUNCTION: Handle DEV category field visibility
-        function handleDevCategoryFields(code) {
-            if (code === 'DEV') {
-                // Hide these fields for DEV category
-                $('#occurrenceCard').addClass('hidden');
-                $('#locationCard').addClass('hidden');
-                $('#deviceCard').addClass('hidden');
-
-                // Remove required attribute
-                $('#occurrenceTime').removeAttr('required');
-                $('#locationInput').removeAttr('required');
-            } else {
-                // Show fields for other categories
-                $('#occurrenceCard').removeClass('hidden');
-                $('#locationCard').removeClass('hidden');
-                $('#deviceCard').removeClass('hidden');
-
-                // Add required attribute back
-                $('#occurrenceTime').attr('required', true);
-                $('#locationInput').attr('required', true);
-            }
+        function checkNetworkSection() {
+            // Get category code from ticket
+            $.get('/ajax/problem-categories', data => {
+                const cat = data.find(c => c.id == ticketData.problem_category_id);
+                if (cat && cat.category_code === 'NET') {
+                    $('#networkCard').removeClass('hidden');
+                }
+            });
         }
 
         function selectSub(id) {
-            selectedSub = id;
             $('.chip').removeClass('selected');
             $(`.chip[data-id="${id}"]`).addClass('selected');
             $('#subCategoryId').val(id);
@@ -1590,23 +1497,6 @@
             $('#cameraBtn').removeClass('has-file');
         }
 
-        function loadUnits() {
-            $.get('/ajax/hospital-units', data => {
-                let html = '<option value="">Pilih unit...</option>';
-                data.forEach(u => {
-                    html += `<option value="${u.id}">${u.unit_code} - ${u.unit_name}</option>`;
-                });
-                $('#unitSelect').html(html);
-            });
-        }
-
-        function setTime() {
-            const now = new Date();
-            const str =
-                `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            $('#occurrenceTime').val(str);
-        }
-
         function nextStep() {
             if (!validate()) return;
             if (step < 4) {
@@ -1648,26 +1538,19 @@
         }
 
         function validate() {
-            if (step === 1 && !selectedCat) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Pilih Kategori',
-                    background: '#fff',
-                    color: '#0f172a'
-                });
-                return false;
-            }
-            if (step === 2) {
-                if (!$('[name="issue_title"]').val()) {
+            if (step === 1) {
+                if (!$('[name="requester_name"]').val() || !$('[name="unit_id"]').val()) {
                     Swal.fire({
                         icon: 'warning',
-                        title: 'Judul Kosong',
+                        title: 'Lengkapi Data',
                         background: '#fff',
                         color: '#0f172a'
                     });
                     return false;
                 }
-                if (!$('[name="description"]').val() || !$('#severityLevel').val()) {
+            }
+            if (step === 2) {
+                if (!$('[name="issue_title"]').val() || !$('[name="description"]').val() || !$('#severityLevel').val()) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Lengkapi Data',
@@ -1678,64 +1561,79 @@
                 }
             }
             if (step === 3) {
-                // ✅ Modified validation: only check unit_id and expected_action
-                // Location is now conditional based on category
-                if (!$('[name="unit_id"]').val() || !$('[name="expected_action"]').val()) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Lengkapi Data',
-                        background: '#fff',
-                        color: '#0f172a'
-                    });
-                    return false;
-                }
+                // Check if DEV category
+                const isDevCategory = $('[name="location"]').closest('.card').hasClass('hidden');
 
-                // ✅ Only validate location if it's required (not DEV category)
-                // if (currentCategoryCode !== 'DEV' && !$('[name="location"]').val()) {
-                //     Swal.fire({
-                //         icon: 'warning',
-                //         title: 'Lengkapi Lokasi',
-                //         background: '#fff',
-                //         color: '#0f172a'
-                //     });
-                //     return false;
-                // }
+                if (!isDevCategory) {
+                    if (!$('[name="location"]').val() || !$('[name="expected_action"]').val()) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Lengkapi Lokasi',
+                            background: '#fff',
+                            color: '#0f172a'
+                        });
+                        return false;
+                    }
+                } else {
+                    // Untuk DEV, hanya cek expected_action
+                    if (!$('[name="expected_action"]').val()) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Lengkapi Data',
+                            text: 'Yang Diharapkan harus diisi',
+                            background: '#fff',
+                            color: '#0f172a'
+                        });
+                        return false;
+                    }
+                }
             }
             return true;
         }
 
         function generateSummary() {
-            const catName = $(`.category-item[data-id="${selectedCat}"]`).find('.category-name').text();
-            const subName = selectedSub ? $(`.chip[data-id="${selectedSub}"]`).text() : '-';
             const unit = $('#unitSelect option:selected').text();
             const sev = $('#severityLevel').val();
             const impact = $('#impactCare').val() === '1' ? 'Ya' : 'Tidak';
+            const subName = $('.chip.selected').text() || '-';
 
-            $('#hiddenPhone').val($('#phoneInput').val());
-
-            let html =
-                `
+            let html = `
             <div class="summary-group">
-                <div class="summary-title"><i class='bx bx-info-circle'></i> Info Masalah</div>
-                <div class="summary-row"><span class="summary-label">Kategori</span><span class="summary-value">${catName}</span></div>
-                <div class="summary-row"><span class="summary-label">Detail</span><span class="summary-value">${subName}</span></div>
+                <div class="summary-title"><i class='bx bx-user'></i> Info Pelapor</div>
+                <div class="summary-row"><span class="summary-label">Nama</span><span class="summary-value">${$('[name="requester_name"]').val()}</span></div>
+                <div class="summary-row"><span class="summary-label">Telepon</span><span class="summary-value">${$('[name="requester_phone"]').val() || '-'}</span></div>
+                <div class="summary-row"><span class="summary-label">Unit</span><span class="summary-value">${unit}</span></div>
+            </div>
+            <div class="summary-group">
+                <div class="summary-title"><i class='bx bx-error-circle'></i> Detail Masalah</div>
                 <div class="summary-row"><span class="summary-label">Judul</span><span class="summary-value">${$('[name="issue_title"]').val()}</span></div>
+                <div class="summary-row"><span class="summary-label">Detail</span><span class="summary-value">${subName}</span></div>
                 <div class="summary-row"><span class="summary-label">Severity</span><span class="summary-value">${sev}</span></div>
                 <div class="summary-row"><span class="summary-label">Impact Pasien</span><span class="summary-value">${impact}</span></div>
             </div>
             <div class="summary-group">
                 <div class="summary-title"><i class='bx bx-map'></i> Lokasi</div>
-                <div class="summary-row"><span class="summary-label">Unit</span><span class="summary-value">${unit}</span></div>`;
-
-            // ✅ Only show location if not DEV category
-            if (currentCategoryCode !== 'DEV') {
-                html +=
-                    `<div class="summary-row"><span class="summary-label">Lokasi</span><span class="summary-value">${$('[name="location"]').val()}</span></div>`;
-            }
-
-            html += `</div>`;
+                <div class="summary-row"><span class="summary-label">Lokasi</span><span class="summary-value">${$('[name="location"]').val()}</span></div>
+                <div class="summary-row"><span class="summary-label">Perangkat</span><span class="summary-value">${$('[name="device_affected"]').val() || '-'}</span></div>
+            </div>`;
 
             $('#summaryContainer').html(html);
+        }
+
+        function checkDevCategory() {
+            $.get('/ajax/problem-categories', data => {
+                const cat = data.find(c => c.id == ticketData.problem_category_id);
+                if (cat && cat.category_code === 'DEV') {
+                    // Hide fields untuk DEV
+                    $('[name="occurrence_time"]').closest('.card').addClass('hidden');
+                    $('[name="device_affected"]').closest('.card').addClass('hidden');
+                    $('[name="location"]').closest('.card').addClass('hidden');
+
+                    // Remove required attribute
+                    $('[name="occurrence_time"]').removeAttr('required');
+                    $('[name="location"]').removeAttr('required');
+                }
+            });
         }
 
         function submitForm() {
@@ -1743,7 +1641,7 @@
             const form = new FormData($('#ticketForm')[0]);
 
             $.ajax({
-                url: '{{ route('service.store') }}',
+                url: '{{ route('service.update', $ticket->ticket_number) }}',
                 type: 'POST',
                 data: form,
                 processData: false,
@@ -1753,14 +1651,14 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
-                        html: `<p>Tiket berhasil dibuat</p>
-                            <div style="padding:14px;background:rgba(14,165,233,0.1);border-radius:12px;margin-top:14px;">
+                        html: `<p>Tiket berhasil diupdate</p>
+                            <div style="padding:14px;background:rgba(245,158,11,0.1);border-radius:12px;margin-top:14px;">
                                 <div style="font-size:11px;color:#64748b;margin-bottom:4px;">No. Tiket</div>
-                                <div style="font-size:17px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#0ea5e9;">${res.ticket_number}</div>
+                                <div style="font-size:17px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#f59e0b;">${res.ticket_number}</div>
                             </div>`,
                         background: '#fff',
                         color: '#0f172a',
-                        confirmButtonColor: '#0ea5e9'
+                        confirmButtonColor: '#f59e0b'
                     }).then(() => {
                         window.location.href = res.redirect_url;
                     });

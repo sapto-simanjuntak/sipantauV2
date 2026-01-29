@@ -73,7 +73,7 @@
             </a>
 
             @if (in_array($ticket->ticket_status, ['Open', 'Pending']))
-                <a href="{{ route('service.edit', $ticket->ticket_number) }}" class="action-button action-secondary">
+                <a href="{{ route('ticket.edit', $ticket->ticket_number) }}" class="action-button action-secondary">
                     <i class='bx bx-edit'></i>
                     Edit
                 </a>

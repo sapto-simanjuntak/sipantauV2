@@ -103,7 +103,7 @@ Route::group(['middleware' => ['role:superadmin|admin|unit|user']], function () 
     Route::post('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
-Route::get('/service-request/create', function () {
+Route::get('/ticket-request/create', function () {
     if (auth()->user()->hasRole(['user'])) {
         return view('pages.modul.user-ticket.create'); // Mobile
     }
@@ -111,26 +111,31 @@ Route::get('/service-request/create', function () {
 })->name('service.create');
 
 
-Route::prefix('service-request')->group(function () {
+Route::prefix('service-request')->middleware(['auth'])->group(function () {
     Route::get('/', [ServiceRequestController::class, 'index'])->name('service.index');
-
-    // Route::get('/create', [ServiceRequestController::class, 'create'])->name('service.create');
     Route::post('/', [ServiceRequestController::class, 'store'])->name('service.store');
 
     Route::get('/ticket/{ticket_number}', [ServiceRequestController::class, 'show'])->name('service.show');
-    Route::get('/service-request/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
-    Route::post('/service-request/{ticket_number}/update', [ServiceRequestController::class, 'update'])->name('service.update');
-    // Route::get('/service-request/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
-    // Route::put('/service-request/{ticket_number}', [ServiceRequestController::class, 'update'])->name('service.update');
+    Route::get('/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
+    Route::post('/{ticket_number}/update', [ServiceRequestController::class, 'update'])->name('service.update');
     Route::delete('/ticket/{ticket_number}', [ServiceRequestController::class, 'destroy'])->name('service.destroy');
 
-    // ✅ PRINT TICKET (QR Code)
     Route::get('/ticket/{ticket_number}/print', [ServiceRequestController::class, 'printTicket'])->name('service.print');
-
     Route::post('/ticket/{ticket_number}/approve', [ServiceRequestController::class, 'approve'])->name('service.approve');
     Route::post('/ticket/{ticket_number}/reject', [ServiceRequestController::class, 'reject'])->name('service.reject');
     Route::post('/ticket/{ticket_number}/assign', [ServiceRequestController::class, 'assign'])->name('service.assign');
     Route::post('/ticket/{ticket_number}/update-status', [ServiceRequestController::class, 'updateStatus'])->name('service.updateStatus');
+});
+
+// ============================================
+// AJAX ROUTES - Harus di luar prefix service-request!
+// ============================================
+Route::prefix('ajax')->middleware(['auth'])->group(function () {
+    // ✅ Gunakan AjaxController untuk semua AJAX
+    Route::get('/hospital-units', [AjaxController::class, 'getHospitalUnits'])->name('ajax.hospital-units');
+    Route::get('/problem-categories', [AjaxController::class, 'getProblemCategories'])->name('ajax.problem-categories');
+    Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories'])->name('ajax.sub-categories');
+    Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics'])->name('ajax.ticket-statistics');
 });
 
 Route::prefix('verify')->name('verify.')->group(function () {
@@ -141,12 +146,12 @@ Route::prefix('verify')->name('verify.')->group(function () {
 });
 
 // AJAX ROUTES
-Route::prefix('ajax')->group(function () {
-    Route::get('/hospital-units', [AjaxController::class, 'getHospitalUnits']);
-    Route::get('/problem-categories', [AjaxController::class, 'getProblemCategories']);
-    Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories']);
-    Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
-});
+// Route::prefix('ajax')->group(function () {
+//     Route::get('/hospital-units', [AjaxController::class, 'getHospitalUnits']);
+//     Route::get('/problem-categories', [AjaxController::class, 'getProblemCategories']);
+//     Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories']);
+//     Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
+// });
 
 
 Route::group(['middleware' => ['role:superadmin|admin|user']], function () {
@@ -155,4 +160,6 @@ Route::group(['middleware' => ['role:superadmin|admin|user']], function () {
     Route::get('/search', [UserTicketController::class, 'search'])->name('search');
     Route::get('/tickets', [UserTicketController::class, 'getTickets'])->name('tickets');
     Route::get('/ticket-mobile/{ticket_number}', [UserTicketController::class, 'show'])->name('ticket.show');
+    Route::get('/ticket-mobile/{ticket_number}/edit', [UserTicketController::class, 'edit'])->name('ticket.edit');
+    Route::post('/ticket-mobile/{ticket_number}/update', [UserTicketController::class, 'update'])->name('ticket.update');
 });

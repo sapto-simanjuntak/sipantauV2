@@ -712,7 +712,7 @@
         }
 
         // ============================================
-        // EVENT HANDLER FUNCTIONS
+        // EVENT HANDLER FUNCTIONS (UPDATED WITH DEV LOGIC)
         // ============================================
         function handleCategoryChange() {
             const categoryId = $('#problem_category').val();
@@ -722,6 +722,27 @@
             $('#sub_category_container').hide();
             $('#network_section').hide();
             $('#problem_sub_category').removeAttr('required');
+
+            // ✅ TAMBAHAN: Show/hide fields untuk DEV
+            if (categoryCode === 'DEV') {
+                // Hide fields yang tidak perlu untuk DEV
+                $('#occurrence_time').closest('.col-12').hide();
+                $('#device_affected').closest('.col-md-6').hide();
+                $('#location').closest('.col-md-6').hide();
+
+                // Remove required attribute
+                $('#occurrence_time').removeAttr('required');
+                $('#location').removeAttr('required');
+            } else {
+                // Show fields untuk kategori lain
+                $('#occurrence_time').closest('.col-12').show();
+                $('#device_affected').closest('.col-md-6').show();
+                $('#location').closest('.col-md-6').show();
+
+                // Add required attribute back
+                $('#occurrence_time').attr('required', true);
+                $('#location').attr('required', true);
+            }
 
             if (!categoryId) return;
 
@@ -764,9 +785,12 @@
         }
 
         // ============================================
-        // SUMMARY GENERATION (✅ FIXED - Ambil dari FORM, bukan ticketData)
+        // SUMMARY GENERATION (UPDATED WITH DEV LOGIC)
         // ============================================
         function generateSummary() {
+            const categoryCode = $('#problem_category option:selected').data('code');
+            const isDevCategory = categoryCode === 'DEV';
+
             // ✅ Ambil data dari FORM (data yang sedang di-edit), BUKAN dari ticketData
             const formData = {
                 requester_name: $('#requester_name').val(),
@@ -778,9 +802,9 @@
                 sub_category: $('#problem_sub_category option:selected').text(),
                 severity: $('#severity_level option:selected').text(),
                 impact_patient: $('#impact_patient_care').is(':checked') ? 'Ya' : 'Tidak',
-                occurrence_time: $('#occurrence_time').val(),
-                device_affected: $('#device_affected').val(),
-                location: $('#location').val(),
+                occurrence_time: isDevCategory ? null : $('#occurrence_time').val(),
+                device_affected: isDevCategory ? null : $('#device_affected').val(),
+                location: isDevCategory ? null : $('#location').val(),
                 expected_action: $('#expected_action').val(),
                 ip_address: $('#ip_address').val(),
                 connection_status: $('#connection_status option:selected').text(),
@@ -816,19 +840,21 @@
             html += createSummaryItem('Deskripsi Masalah', formData.description);
             html += '</div>';
 
-            // Lokasi & Perangkat
-            html += '<div class="col-md-6 mt-3">';
-            html += '<h6 class="text-primary mb-3"><i class="bx bx-map"></i> Lokasi & Perangkat</h6>';
-            html += createSummaryItem('Perangkat', formData.device_affected || '-');
-            html += createSummaryItem('Lokasi', formData.location);
-            html += createSummaryItem('Waktu Kejadian', formatDateTime(formData.occurrence_time));
-            if (formData.ip_address) {
-                html += createSummaryItem('IP Address', formData.ip_address);
+            // ✅ HANYA tampilkan Lokasi & Perangkat jika BUKAN DEV
+            if (!isDevCategory) {
+                html += '<div class="col-md-6 mt-3">';
+                html += '<h6 class="text-primary mb-3"><i class="bx bx-map"></i> Lokasi & Perangkat</h6>';
+                html += createSummaryItem('Perangkat', formData.device_affected || '-');
+                html += createSummaryItem('Lokasi', formData.location);
+                html += createSummaryItem('Waktu Kejadian', formatDateTime(formData.occurrence_time));
+                if (formData.ip_address) {
+                    html += createSummaryItem('IP Address', formData.ip_address);
+                }
+                if (formData.connection_status && formData.connection_status !== '- Pilih Status -') {
+                    html += createSummaryItem('Status Koneksi', formData.connection_status);
+                }
+                html += '</div>';
             }
-            if (formData.connection_status && formData.connection_status !== '- Pilih Status -') {
-                html += createSummaryItem('Status Koneksi', formData.connection_status);
-            }
-            html += '</div>';
 
             // Tindakan & Lampiran
             html += '<div class="col-md-6 mt-3">';
@@ -852,7 +878,7 @@
         }
 
         // ============================================
-        // UPDATE TICKET FUNCTION
+        // UPDATE TICKET FUNCTION (UPDATED WITH DEV LOGIC)
         // ============================================
         function updateTicket() {
             const form = $('#ticketForm')[0];
@@ -863,6 +889,13 @@
             if (categoryCode !== 'NET') {
                 formData.delete('ip_address');
                 formData.delete('connection_status');
+            }
+
+            // ✅ Remove DEV-specific fields jika kategori DEV
+            if (categoryCode === 'DEV') {
+                formData.delete('occurrence_time');
+                formData.delete('device_affected');
+                formData.delete('location');
             }
 
             // Remove empty values

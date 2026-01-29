@@ -855,7 +855,7 @@
                 <div class="breadcrumb">
                     <a href="{{ route('dashboard') }}"><i class='bx bx-home-alt'></i></a>
                     <i class='bx bx-chevron-right'></i>
-                    <a href="{{ route('service.index') }}">Daftar Tiket</a>
+                    <a href="{{ route('ticket.index') }}">Daftar Tiket</a>
                     <i class='bx bx-chevron-right'></i>
                     <span class="breadcrumb-active">{{ $ticket->ticket_number }}</span>
                 </div>
@@ -945,7 +945,7 @@
                 <!-- Action Buttons -->
                 <div class="action-bar">
                     @if ($ticket->validation_status === 'pending')
-                        <a href="{{ route('service.edit', $ticket->ticket_number) }}" class="btn btn-secondary">
+                        <a href="{{ route('ticket.edit', $ticket->ticket_number) }}" class="btn btn-secondary">
                             <i class='bx bx-edit-alt'></i> Edit
                         </a>
                     @endif

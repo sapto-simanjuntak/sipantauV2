@@ -253,7 +253,6 @@
                                         </div>
 
                                         {{-- STEP 2: Detail Masalah --}}
-                                        {{-- STEP 2: Detail Masalah --}}
                                         <div id="step-2" class="content" role="tabpanel"
                                             aria-labelledby="stepTrigger2">
                                             <div class="step-content">
@@ -642,6 +641,27 @@
             $('#sub_category_container').hide();
             $('#network_section').hide();
 
+            // ✅ TAMBAHAN: Show/hide fields untuk DEV
+            if (categoryCode === 'DEV') {
+                // Hide fields yang tidak perlu untuk DEV
+                $('#occurrence_time').closest('.col-12').hide();
+                $('#device_affected').closest('.col-md-6').hide();
+                $('#location').closest('.col-md-6').hide();
+
+                // Remove required attribute
+                $('#occurrence_time').removeAttr('required');
+                $('#location').removeAttr('required');
+            } else {
+                // Show fields untuk kategori lain
+                $('#occurrence_time').closest('.col-12').show();
+                $('#device_affected').closest('.col-md-6').show();
+                $('#location').closest('.col-md-6').show();
+
+                // Add required attribute back
+                $('#occurrence_time').attr('required', true);
+                $('#location').attr('required', true);
+            }
+
             // ✅ RESET required attribute
             $('#problem_sub_category').removeAttr('required');
 
@@ -736,12 +756,12 @@
         }
 
         // ============================================
-        // GENERATE SUMMARY
-        // ============================================
-        // ============================================
-        // GENERATE SUMMARY
+        // GENERATE SUMMARY (UPDATED)
         // ============================================
         function generateSummary() {
+            const categoryCode = $('#problem_category option:selected').data('code');
+            const isDevCategory = categoryCode === 'DEV';
+
             const formData = {
                 requester_name: $('#requester_name').val(),
                 requester_phone: $('#requester_phone').val(),
@@ -750,15 +770,14 @@
                 description: $('#description').val(),
                 category: $('#problem_category option:selected').text(),
                 sub_category: $('#problem_sub_category option:selected').text(),
-                // ❌ HAPUS: hardware & software
                 severity: $('#severity_level option:selected').text(),
                 impact_patient: $('#impact_patient_care').is(':checked') ? 'Ya' : 'Tidak',
-                occurrence_time: $('#occurrence_time').val(),
-                device_affected: $('#device_affected').val(),
-                location: $('#location').val(),
+                occurrence_time: isDevCategory ? null : $('#occurrence_time').val(),
+                device_affected: isDevCategory ? null : $('#device_affected').val(),
+                location: isDevCategory ? null : $('#location').val(),
                 expected_action: $('#expected_action').val(),
-                ip_address: $('#ip_address').val(), // ✅ TAMBAH untuk network
-                connection_status: $('#connection_status option:selected').text(), // ✅ TAMBAH
+                ip_address: $('#ip_address').val(),
+                connection_status: $('#connection_status option:selected').text(),
                 file: $('#file_path')[0]?.files[0]?.name || '-'
             };
 
@@ -778,7 +797,6 @@
             html += createSummaryItem('Judul', formData.issue_title);
             html += createSummaryItem('Kategori', formData.category);
 
-            // ✅ Show sub-category (detail masalah)
             if (formData.sub_category && formData.sub_category !== '- Pilih Detail Masalah -') {
                 html += createSummaryItem('Detail Masalah', formData.sub_category);
             }
@@ -793,21 +811,22 @@
             html += createSummaryItem('Deskripsi Masalah', formData.description);
             html += '</div>';
 
-            // Lokasi & Network Info
-            html += '<div class="col-md-6 mt-3">';
-            html += '<h6 class="text-primary mb-3"><i class="bx bx-map"></i> Lokasi & Perangkat</h6>';
-            html += createSummaryItem('Perangkat', formData.device_affected || '-');
-            html += createSummaryItem('Lokasi', formData.location);
-            html += createSummaryItem('Waktu Kejadian', formatDateTime(formData.occurrence_time));
+            // ✅ HANYA tampilkan Lokasi & Perangkat jika BUKAN DEV
+            if (!isDevCategory) {
+                html += '<div class="col-md-6 mt-3">';
+                html += '<h6 class="text-primary mb-3"><i class="bx bx-map"></i> Lokasi & Perangkat</h6>';
+                html += createSummaryItem('Perangkat', formData.device_affected || '-');
+                html += createSummaryItem('Lokasi', formData.location);
+                html += createSummaryItem('Waktu Kejadian', formatDateTime(formData.occurrence_time));
 
-            // ✅ Show network info if exists
-            if (formData.ip_address) {
-                html += createSummaryItem('IP Address', formData.ip_address);
+                if (formData.ip_address) {
+                    html += createSummaryItem('IP Address', formData.ip_address);
+                }
+                if (formData.connection_status && formData.connection_status !== '- Pilih Status -') {
+                    html += createSummaryItem('Status Koneksi', formData.connection_status);
+                }
+                html += '</div>';
             }
-            if (formData.connection_status && formData.connection_status !== '- Pilih Status -') {
-                html += createSummaryItem('Status Koneksi', formData.connection_status);
-            }
-            html += '</div>';
 
             // Tindakan & Lampiran
             html += '<div class="col-md-6 mt-3">';
@@ -843,22 +862,25 @@
         }
 
         // ============================================
-        // SUBMIT TICKET
-        // ============================================
-        // ============================================
         // SUBMIT TICKET (UPDATED)
         // ============================================
         function submitTicket() {
             const form = $('#ticketForm')[0];
             const formData = new FormData(form);
 
-            // ✅ Get category code untuk conditional field
             const categoryCode = $('#problem_category option:selected').data('code');
 
             // ✅ Remove network fields jika bukan kategori Network
             if (categoryCode !== 'NET') {
                 formData.delete('ip_address');
                 formData.delete('connection_status');
+            }
+
+            // ✅ Remove DEV-specific fields jika kategori DEV
+            if (categoryCode === 'DEV') {
+                formData.delete('occurrence_time');
+                formData.delete('device_affected');
+                formData.delete('location');
             }
 
             // ✅ Remove empty values

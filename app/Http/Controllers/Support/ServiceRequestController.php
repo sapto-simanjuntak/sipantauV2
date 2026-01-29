@@ -356,6 +356,8 @@ class ServiceRequestController extends Controller
         ]);
     }
 
+
+
     private function getActionButtons($ticket, $user)
     {
         $html = '<div class="btn-group" role="group">';
@@ -417,9 +419,9 @@ class ServiceRequestController extends Controller
             'problem_sub_category_id' => 'nullable|exists:problem_sub_categories,id',
             'severity_level' => 'required|in:Rendah,Sedang,Tinggi,Kritis',
             'impact_patient_care' => 'nullable|boolean',
-            'occurrence_time' => 'required|date',
+            'occurrence_time' => 'nullable|date',           // ✅ UBAH: required → nullable
             'device_affected' => 'nullable|string|max:255',
-            'location' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',        // ✅ UBAH: required → nullable
             'expected_action' => 'required|string',
             'file_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ];
@@ -432,6 +434,13 @@ class ServiceRequestController extends Controller
             // Hanya validate network fields kalau kategori = Network
             $rules['ip_address'] = 'nullable|ip';
             $rules['connection_status'] = 'nullable|string';
+        }
+
+        // ✅ TAMBAHAN: Conditional validation untuk kategori NON-DEV
+        if ($category && $category->category_code !== 'DEV') {
+            // Kalau BUKAN kategori DEV, maka location dan occurrence_time wajib
+            $rules['location'] = 'required|string|max:255';
+            $rules['occurrence_time'] = 'required|date';
         }
 
         // Validate
@@ -468,6 +477,16 @@ class ServiceRequestController extends Controller
 
         // Calculate SLA deadline
         $validated['sla_deadline'] = now()->addHours($category->default_sla_hours);
+
+        // ✅ TAMBAHAN: Set default occurrence_time jika kosong (untuk DEV)
+        if (!isset($validated['occurrence_time'])) {
+            $validated['occurrence_time'] = now();
+        }
+
+        // ✅ TAMBAHAN: Set default location jika kosong (untuk DEV)
+        if (!isset($validated['location'])) {
+            $validated['location'] = '-'; // atau bisa dikosongkan sesuai kebutuhan
+        }
 
         // Create ticket
         $ticket = ServiceRequest::create($validated);
@@ -571,9 +590,10 @@ class ServiceRequestController extends Controller
             'problem_sub_category_id' => 'nullable|exists:problem_sub_categories,id',
             'severity_level' => 'required|in:Rendah,Sedang,Tinggi,Kritis',
             'impact_patient_care' => 'nullable|boolean',
-            'occurrence_time' => 'required|date',
+            'occurrence_time' => 'nullable|date',           // ✅ UBAH: required → nullable
             'device_affected' => 'nullable|string|max:255',
-            'location' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',        // ✅ UBAH: required → nullable
+
             'expected_action' => 'required|string',
             'file_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ];

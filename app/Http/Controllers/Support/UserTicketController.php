@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Modul\ServiceRequest;
 use Illuminate\Support\Facades\Cache;
+use App\Models\Master\ProblemCategory;
 
 class UserTicketController extends Controller
 {
@@ -271,5 +272,147 @@ class UserTicketController extends Controller
         });
 
         return $timeline;
+    }
+
+    public function edit($ticket_number)
+    {
+        $ticket = ServiceRequest::with([
+            'user',
+            'hospitalUnit',
+            'problemCategory',
+            'problemSubCategory'
+        ])->where('ticket_number', $ticket_number)->firstOrFail();
+
+        // Authorization check
+        $user = auth()->user();
+
+        // Admin/Superadmin bisa edit semua
+        // Teknisi hanya bisa edit yang assigned ke dia
+        // User hanya bisa edit ticket miliknya sendiri dengan status 'Open'
+        if (!$user->hasAnyRole(['admin', 'superadmin'])) {
+            if ($user->hasRole('teknisi')) {
+                if ($ticket->assigned_to !== $user->id) {
+                    abort(403, 'Anda tidak memiliki akses untuk edit tiket ini');
+                }
+            } else {
+                // Regular user
+                if ($ticket->user_id !== $user->id) {
+                    abort(403, 'Anda tidak memiliki akses untuk edit tiket ini');
+                }
+                // User hanya bisa edit ticket dengan status Open
+                if ($ticket->ticket_status !== 'Open') {
+                    abort(403, 'Tiket dengan status "' . $ticket->ticket_status . '" tidak dapat diedit');
+                }
+            }
+        }
+
+        return view('pages.modul.user-ticket.edit', compact('ticket'));
+    }
+
+    public function update(Request $request, $ticket_number)
+    {
+        $ticket = ServiceRequest::where('ticket_number', $ticket_number)->firstOrFail();
+
+        // Authorization check (sama seperti edit)
+        $user = auth()->user();
+
+        if (!$user->hasAnyRole(['admin', 'superadmin'])) {
+            if ($user->hasRole('teknisi')) {
+                if ($ticket->assigned_to !== $user->id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Anda tidak memiliki akses untuk update tiket ini'
+                    ], 403);
+                }
+            } else {
+                if ($ticket->user_id !== $user->id || $ticket->ticket_status !== 'Open') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tiket tidak dapat diupdate'
+                    ], 403);
+                }
+            }
+        }
+
+        // ✅ Base validation
+        $rules = [
+            'requester_name' => 'required|string|max:100',
+            'requester_phone' => 'nullable|string|max:20',
+            'unit_id' => 'required|exists:hospital_units,id',
+            'issue_title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'problem_category_id' => 'required|exists:problem_categories,id',
+            'problem_sub_category_id' => 'nullable|exists:problem_sub_categories,id',
+            'severity_level' => 'required|in:Rendah,Sedang,Tinggi,Kritis',
+            'impact_patient_care' => 'nullable|boolean',
+            'occurrence_time' => 'required|date',
+            'device_affected' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
+            'expected_action' => 'required|string',
+            'file_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+        ];
+
+        // ✅ Get category untuk conditional validation
+        $category = ProblemCategory::find($request->problem_category_id);
+
+        // ✅ Conditional validation for Network category
+        if ($category && $category->category_code === 'NET') {
+            $rules['ip_address'] = 'nullable|ip';
+            $rules['connection_status'] = 'nullable|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        // ✅ Clean up NULL/empty values
+        $validated = array_filter($validated, function ($value) {
+            return !is_null($value) && $value !== '';
+        });
+
+        // Handle file upload (jika ada file baru)
+        if ($request->hasFile('file_path')) {
+            // Delete old file if exists
+            if ($ticket->file_path && Storage::disk('public')->exists($ticket->file_path)) {
+                Storage::disk('public')->delete($ticket->file_path);
+            }
+
+            $file = $request->file('file_path');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('tickets', $filename, 'public');
+            $validated['file_path'] = $filePath;
+        }
+
+        // Recalculate priority if severity or unit changed
+        $unit = HospitalUnit::find($validated['unit_id']);
+        $validated['priority'] = $this->calculatePriority(
+            $validated['severity_level'],
+            $unit->unit_type
+        );
+
+        // Recalculate SLA if category changed
+        if ($ticket->problem_category_id != $validated['problem_category_id']) {
+            $validated['sla_deadline'] = now()->addHours($category->default_sla_hours);
+        }
+
+        // Update ticket
+        $ticket->update($validated);
+
+        // ✅ Role-based redirect (sama seperti store)
+        $redirectUrl = route('service.index');
+        if ($user->hasRole('user') && !$user->hasAnyRole(['superadmin', 'admin', 'teknisi'])) {
+            $redirectUrl = route('ticket.index');
+        }
+
+        Log::info('Ticket Updated', [
+            'ticket_number' => $ticket_number,
+            'user_id' => $user->id,
+            'changes' => $ticket->getChanges()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tiket berhasil diupdate',
+            'ticket_number' => $ticket_number,
+            'redirect_url' => $redirectUrl
+        ]);
     }
 }
