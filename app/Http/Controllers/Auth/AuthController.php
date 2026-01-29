@@ -48,10 +48,24 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (auth()->attempt($credentials)) {
-            return redirect()->route('home');
+
+            $request->session()->regenerate();
+
+            $user = auth()->user();
+
+            if ($user->hasRole(['superadmin', 'admin'])) {
+                return redirect()->route('dashboard');
+            }
+
+            if ($user->hasRole('user')) {
+                return redirect()->route('ticket.index');
+            }
+
+            auth()->logout();
+            abort(403, 'Role tidak valid.');
         }
 
-        return redirect()->back()
+        return back()
             ->withErrors(['email' => 'Email or password is incorrect.'])
             ->withInput();
     }

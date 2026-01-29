@@ -20,12 +20,18 @@ use Endroid\QrCode\Encoding\Encoding;
 use App\Models\Master\ProblemCategory;
 use Endroid\QrCode\RoundBlockSizeMode;
 use App\Models\Modul\ServiceRequestLog;
+use Illuminate\Support\Facades\Storage;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Yajra\DataTables\Facades\DataTables;
 
 
 class ServiceRequestController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
     public function index()
     {
@@ -350,50 +356,44 @@ class ServiceRequestController extends Controller
         ]);
     }
 
-    // ✅ FIX: getActionButtons method
     private function getActionButtons($ticket, $user)
     {
         $html = '<div class="btn-group" role="group">';
 
-        $html .= '<a href="' . route('service.show', ['ticket_number' => $ticket->ticket_number]) . '"
-            class="btn btn-sm btn-info" title="Detail">
-            <i class="bx bx-show"></i></a>';
+        // ✅ View button (semua role)
+        $html .= '<a href="' . route('service.show', $ticket->ticket_number) . '"
+              class="btn btn-sm btn-info" title="Detail">
+              <i class="bx bx-show"></i>
+              </a>';
 
-        if ($user->hasRole(['user', 'pegawai', 'staff'])) {
-            if (in_array($ticket->ticket_status, ['Open', 'Pending'])) {
-                $html .= '<a href="' . route('service.edit', ['ticket_number' => $ticket->ticket_number]) . '"
-                    class="btn btn-sm btn-warning" title="Edit">
-                    <i class="bx bx-edit"></i></a>';
-
-                $html .= '<button type="button" class="btn btn-sm btn-danger delete"
-                    data-ticket="' . htmlspecialchars($ticket->ticket_number, ENT_QUOTES, 'UTF-8') . '"
-                    title="Hapus">
-                    <i class="bx bx-trash"></i></button>';
-            }
-        } elseif ($user->hasRole(['technician', 'teknisi'])) {
-            // Teknisi hanya ada tombol detail
-        } elseif ($user->hasRole(['admin', 'superadmin', 'super admin'])) {
-            if (!in_array($ticket->ticket_status, ['Closed', 'Rejected'])) {
-                $html .= '<a href="' . route('service.edit', ['ticket_number' => $ticket->ticket_number]) . '"
-                    class="btn btn-sm btn-warning" title="Edit">
-                    <i class="bx bx-edit"></i></a>';
-            }
-
-            if (in_array($ticket->ticket_status, ['Open', 'Pending'])) {
-                $html .= '<button type="button" class="btn btn-sm btn-danger delete"
-                    data-ticket="' . htmlspecialchars($ticket->ticket_number, ENT_QUOTES, 'UTF-8') . '"
-                    title="Hapus">
-                    <i class="bx bx-trash"></i></button>';
-            }
-
-            // ✅ FIX: Ganti assigned_technician_id ke assigned_to
-            if (in_array($ticket->ticket_status, ['Open', 'Approved']) && !$ticket->assigned_to) {
-                $html .= '<button type="button" class="btn btn-sm btn-primary assign-ticket"
-                    data-ticket="' . htmlspecialchars($ticket->ticket_number, ENT_QUOTES, 'UTF-8') . '"
-                    title="Assign ke Teknisi">
-                    <i class="bx bx-user-plus"></i></button>';
-            }
+        // ✅ Edit button (conditional)
+        $canEdit = false;
+        if ($user->hasAnyRole(['admin', 'superadmin'])) {
+            $canEdit = true;
+        } elseif ($user->hasRole('teknisi') && $ticket->assigned_to == $user->id) {
+            $canEdit = true;
+        } elseif ($ticket->user_id == $user->id && $ticket->ticket_status == 'Open') {
+            $canEdit = true;
         }
+
+        if ($canEdit) {
+            $html .= '<a href="' . route('service.edit', $ticket->ticket_number) . '"
+                  class="btn btn-sm btn-warning" title="Edit">
+                  <i class="bx bx-edit"></i>
+                  </a>';
+        }
+
+        // ✅ Delete button (admin only, status Open)
+        if ($user->hasAnyRole(['admin', 'superadmin']) && $ticket->ticket_status == 'Open') {
+            $html .= '<button class="btn btn-sm btn-danger delete"
+                data-ticket="' . e($ticket->ticket_number) . '"
+                data-url="' . route('service.destroy', $ticket->ticket_number) . '"
+                title="Hapus">
+                <i class="bx bx-trash"></i>
+            </button>';
+        }
+
+
 
         $html .= '</div>';
         return $html;
@@ -496,6 +496,148 @@ class ServiceRequestController extends Controller
             'success' => true,
             'message' => 'Tiket berhasil dibuat',
             'ticket_number' => $ticketNumber,
+            'redirect_url' => $redirectUrl
+        ]);
+    }
+
+    public function edit($ticket_number)
+    {
+        $ticket = ServiceRequest::with([
+            'user',
+            'hospitalUnit',
+            'problemCategory',
+            'problemSubCategory'
+        ])->where('ticket_number', $ticket_number)->firstOrFail();
+
+        // Authorization check
+        $user = auth()->user();
+
+        // Admin/Superadmin bisa edit semua
+        // Teknisi hanya bisa edit yang assigned ke dia
+        // User hanya bisa edit ticket miliknya sendiri dengan status 'Open'
+        if (!$user->hasAnyRole(['admin', 'superadmin'])) {
+            if ($user->hasRole('teknisi')) {
+                if ($ticket->assigned_to !== $user->id) {
+                    abort(403, 'Anda tidak memiliki akses untuk edit tiket ini');
+                }
+            } else {
+                // Regular user
+                if ($ticket->user_id !== $user->id) {
+                    abort(403, 'Anda tidak memiliki akses untuk edit tiket ini');
+                }
+                // User hanya bisa edit ticket dengan status Open
+                if ($ticket->ticket_status !== 'Open') {
+                    abort(403, 'Tiket dengan status "' . $ticket->ticket_status . '" tidak dapat diedit');
+                }
+            }
+        }
+
+        return view('pages.modul.service-request.edit', compact('ticket'));
+    }
+
+    public function update(Request $request, $ticket_number)
+    {
+        $ticket = ServiceRequest::where('ticket_number', $ticket_number)->firstOrFail();
+
+        // Authorization check (sama seperti edit)
+        $user = auth()->user();
+
+        if (!$user->hasAnyRole(['admin', 'superadmin'])) {
+            if ($user->hasRole('teknisi')) {
+                if ($ticket->assigned_to !== $user->id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Anda tidak memiliki akses untuk update tiket ini'
+                    ], 403);
+                }
+            } else {
+                if ($ticket->user_id !== $user->id || $ticket->ticket_status !== 'Open') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tiket tidak dapat diupdate'
+                    ], 403);
+                }
+            }
+        }
+
+        // ✅ Base validation
+        $rules = [
+            'requester_name' => 'required|string|max:100',
+            'requester_phone' => 'nullable|string|max:20',
+            'unit_id' => 'required|exists:hospital_units,id',
+            'issue_title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'problem_category_id' => 'required|exists:problem_categories,id',
+            'problem_sub_category_id' => 'nullable|exists:problem_sub_categories,id',
+            'severity_level' => 'required|in:Rendah,Sedang,Tinggi,Kritis',
+            'impact_patient_care' => 'nullable|boolean',
+            'occurrence_time' => 'required|date',
+            'device_affected' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
+            'expected_action' => 'required|string',
+            'file_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+        ];
+
+        // ✅ Get category untuk conditional validation
+        $category = ProblemCategory::find($request->problem_category_id);
+
+        // ✅ Conditional validation for Network category
+        if ($category && $category->category_code === 'NET') {
+            $rules['ip_address'] = 'nullable|ip';
+            $rules['connection_status'] = 'nullable|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        // ✅ Clean up NULL/empty values
+        $validated = array_filter($validated, function ($value) {
+            return !is_null($value) && $value !== '';
+        });
+
+        // Handle file upload (jika ada file baru)
+        if ($request->hasFile('file_path')) {
+            // Delete old file if exists
+            if ($ticket->file_path && Storage::disk('public')->exists($ticket->file_path)) {
+                Storage::disk('public')->delete($ticket->file_path);
+            }
+
+            $file = $request->file('file_path');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('tickets', $filename, 'public');
+            $validated['file_path'] = $filePath;
+        }
+
+        // Recalculate priority if severity or unit changed
+        $unit = HospitalUnit::find($validated['unit_id']);
+        $validated['priority'] = $this->calculatePriority(
+            $validated['severity_level'],
+            $unit->unit_type
+        );
+
+        // Recalculate SLA if category changed
+        if ($ticket->problem_category_id != $validated['problem_category_id']) {
+            $validated['sla_deadline'] = now()->addHours($category->default_sla_hours);
+        }
+
+        // Update ticket
+        $ticket->update($validated);
+
+        // ✅ Role-based redirect (sama seperti store)
+        $redirectUrl = route('service.index');
+        if ($user->hasRole('user') && !$user->hasAnyRole(['superadmin', 'admin', 'teknisi'])) {
+            $redirectUrl = route('ticket.index');
+        }
+
+        Log::info('Ticket Updated', [
+            'ticket_number' => $ticket_number,
+            'user_id' => $user->id,
+            'changes' => $ticket->getChanges()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tiket berhasil diupdate',
+            'ticket_number' => $ticket_number,
             'redirect_url' => $redirectUrl
         ]);
     }
@@ -1279,5 +1421,17 @@ class ServiceRequestController extends Controller
         }
 
         return $timeline->sortBy('timestamp');
+    }
+
+    public function destroy($ticket_number)
+    {
+        $ticket = ServiceRequest::where('ticket_number', $ticket_number)->firstOrFail();
+
+        $ticket->delete();
+
+        return response()->json([
+            'message' => 'Tiket berhasil dihapus',
+            'ticket_number' => $ticket_number
+        ]);
     }
 }

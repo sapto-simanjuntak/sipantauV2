@@ -16,6 +16,11 @@ class AjaxController extends Controller
     /**
      * Get Hospital Units
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function getHospitalUnits()
     {
         $units = HospitalUnit::where('is_active', true)

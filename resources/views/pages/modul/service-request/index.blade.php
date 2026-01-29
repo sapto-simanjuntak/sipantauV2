@@ -625,6 +625,46 @@
                 ]);
             }
 
+            $(document).on("click", ".delete", function() {
+
+                let ticketNumber = $(this).data("ticket");
+                let url = $(this).data("url");
+
+                Swal.fire({
+                    title: "Hapus Tiket?",
+                    text: "Tiket " + ticketNumber + " akan dihapus permanen!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Ya, Hapus!"
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+
+                        $.ajax({
+                            url: url,
+                            type: "DELETE",
+                            data: {
+                                _token: "{{ csrf_token() }}"
+                            },
+                            success: function(res) {
+                                Swal.fire("Berhasil!", res.message, "success");
+                                datatable.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                Swal.fire("Gagal!", "Tiket gagal dihapus", "error");
+                            }
+                        });
+
+                    }
+
+                });
+
+            });
+
+
+
             var datatable = $('#crudTable').DataTable({
                 processing: true,
                 serverSide: true,

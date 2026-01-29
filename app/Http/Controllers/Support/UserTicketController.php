@@ -14,6 +14,12 @@ class UserTicketController extends Controller
     /**
      * Display mobile-optimized ticket dashboard with pagination
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+
     public function index(Request $request)
     {
         $user = auth()->user();

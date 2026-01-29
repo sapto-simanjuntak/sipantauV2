@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Akses\RoleController;
@@ -38,11 +39,9 @@ use App\Http\Controllers\Support\SignatureVerificationController;
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
-});
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
 
 Route::get('/', function () {
     return view('auth/login');
@@ -119,9 +118,10 @@ Route::prefix('service-request')->group(function () {
     Route::post('/', [ServiceRequestController::class, 'store'])->name('service.store');
 
     Route::get('/ticket/{ticket_number}', [ServiceRequestController::class, 'show'])->name('service.show');
-
-    Route::get('/ticket/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
-    Route::put('/ticket/{ticket_number}', [ServiceRequestController::class, 'update'])->name('service.update');
+    Route::get('/service-request/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
+    Route::post('/service-request/{ticket_number}/update', [ServiceRequestController::class, 'update'])->name('service.update');
+    // Route::get('/service-request/{ticket_number}/edit', [ServiceRequestController::class, 'edit'])->name('service.edit');
+    // Route::put('/service-request/{ticket_number}', [ServiceRequestController::class, 'update'])->name('service.update');
     Route::delete('/ticket/{ticket_number}', [ServiceRequestController::class, 'destroy'])->name('service.destroy');
 
     // ✅ PRINT TICKET (QR Code)
@@ -148,8 +148,11 @@ Route::prefix('ajax')->group(function () {
     Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
 });
 
-Route::get('/ticket-user', [UserTicketController::class, 'index'])->name('ticket.index');
-Route::get('/stats', [UserTicketController::class, 'getStats'])->name('stats');
-Route::get('/search', [UserTicketController::class, 'search'])->name('search');
-Route::get('/tickets', [UserTicketController::class, 'getTickets'])->name('tickets');
-Route::get('/ticket-mobile/{ticket_number}', [UserTicketController::class, 'show'])->name('ticket.show');
+
+Route::group(['middleware' => ['role:superadmin|admin|user']], function () {
+    Route::get('/ticket-user', [UserTicketController::class, 'index'])->name('ticket.index');
+    Route::get('/stats', [UserTicketController::class, 'getStats'])->name('stats');
+    Route::get('/search', [UserTicketController::class, 'search'])->name('search');
+    Route::get('/tickets', [UserTicketController::class, 'getTickets'])->name('tickets');
+    Route::get('/ticket-mobile/{ticket_number}', [UserTicketController::class, 'show'])->name('ticket.show');
+});

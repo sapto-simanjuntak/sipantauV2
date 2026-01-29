@@ -1198,14 +1198,6 @@
                         <button class="icon-button" onclick="location.reload()">
                             <i class='bx bx-refresh'></i>
                         </button>
-                        <button class="icon-button" id="notificationBtn">
-                            <i class='bx bx-bell'></i>
-                            @if ($stats['active'] > 0)
-                                <span class="badge" id="notificationBadge">{{ $stats['active'] }}</span>
-                            @else
-                                <span class="badge" id="notificationBadge" style="display: none;">0</span>
-                            @endif
-                        </button>
 
                         <!-- USER MENU -->
                         <div class="user-menu">

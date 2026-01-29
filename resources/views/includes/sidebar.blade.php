@@ -11,27 +11,31 @@
      </div>
      <!--navigation-->
      <ul class="metismenu" id="menu">
-         <li class="menu-label">Dashboard</li>
-         <li>
-             <a href="{{ route('dashboard') }}">
-                 <div class="parent-icon"><i class='bx bx-home-alt'></i>
-                 </div>
-                 <div class="menu-title">Dashboard</div>
-             </a>
-         </li>
+         @role('superadmin|admin')
+             <li class="menu-label">Dashboard</li>
+             <li>
+                 <a href="{{ route('dashboard') }}">
+                     <div class="parent-icon"><i class='bx bx-home-alt'></i>
+                     </div>
+                     <div class="menu-title">Dashboard</div>
+                 </a>
+             </li>
+             <li class="menu-label">Hardware / Jaringan / Software</li>
+
+             <li>
+                 <a href="{{ route('service.index') }}">
+                     <div class="parent-icon"><i class='bx bx-book'></i>
+                     </div>
+                     <div class="menu-title">Request Perbaikan</div>
+                 </a>
+             </li>
+         @endrole
          <li class="menu-label">Hardware / Jaringan / Software</li>
-         <li>
-             <a href="{{ route('service.index') }}">
-                 <div class="parent-icon"><i class='bx bx-book'></i>
-                 </div>
-                 <div class="menu-title">Request Perbaikan</div>
-             </a>
-         </li>
          <li>
              <a href="{{ route('ticket.index') }}">
                  <div class="parent-icon"><i class='bx bx-book'></i>
                  </div>
-                 <div class="menu-title">Request Mobile</div>
+                 <div class="menu-title">Form Request</div>
              </a>
          </li>
          <li class="menu-label">Pembuatan / Pengembangan Sistem / Data</li>
@@ -51,28 +55,29 @@
              </a>
          </li>
          <li class="menu-label">Settings</li>
-
-         <li>
-             <a href="{{ route('user.index') }}">
-                 <div class="parent-icon"><i class='bx bx-user'></i>
-                 </div>
-                 <div class="menu-title">Users</div>
-             </a>
-         </li>
-         <li>
-             <a href="{{ route('permission.index') }}">
-                 <div class="parent-icon"><i class='bx bx-user'></i>
-                 </div>
-                 <div class="menu-title">Permission</div>
-             </a>
-         </li>
-         <li>
-             <a href="{{ route('role.index') }}">
-                 <div class="parent-icon"><i class='bx bx-user'></i>
-                 </div>
-                 <div class="menu-title">Roles</div>
-             </a>
-         </li>
+         @role('superadmin|admin')
+             <li>
+                 <a href="{{ route('user.index') }}">
+                     <div class="parent-icon"><i class='bx bx-user'></i>
+                     </div>
+                     <div class="menu-title">Users</div>
+                 </a>
+             </li>
+             <li>
+                 <a href="{{ route('permission.index') }}">
+                     <div class="parent-icon"><i class='bx bx-user'></i>
+                     </div>
+                     <div class="menu-title">Permission</div>
+                 </a>
+             </li>
+             <li>
+                 <a href="{{ route('role.index') }}">
+                     <div class="parent-icon"><i class='bx bx-user'></i>
+                     </div>
+                     <div class="menu-title">Roles</div>
+                 </a>
+             </li>
+         @endrole
 
          <li>
              <a href="{{ route('user.show', Auth::id()) }}">
