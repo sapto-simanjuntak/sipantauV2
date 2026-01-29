@@ -1347,12 +1347,12 @@
                                 <p>Screenshot atau foto masalah</p>
                             </div>
                         </div>
-                        <input type="file" name="file_path" id="fileInput" accept="image/*" style="display:none"
-                            onchange="handleFile(this)">
+                        <input type="file" name="file_path" id="fileInput" accept="image/*,application/pdf"
+                            style="display:none" onchange="handleFile(this)">
                         <label for="fileInput" class="camera-upload" id="cameraBtn">
                             <i class='bx bx-camera'></i>
                             <p>Tap untuk Upload Foto</p>
-                            <small>Max 5MB • JPG, PNG</small>
+                            <small>Max 5MB • JPG, PNG, PDF</small>
                         </label>
                         <div class="file-preview" id="filePreview">
                             <img id="previewImg" class="preview-img">
