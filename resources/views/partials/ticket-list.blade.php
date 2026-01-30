@@ -46,7 +46,7 @@
                 </span>
             </div>
 
-            @if ($ticket->sla_deadline)
+            {{-- @if ($ticket->sla_deadline)
                 @php
                     $deadline = \Carbon\Carbon::parse($ticket->sla_deadline);
                     $hoursRemaining = now()->diffInHours($deadline, false);
@@ -62,7 +62,7 @@
                         <span>⏰ {{ round($hoursRemaining) }} jam tersisa</span>
                     </div>
                 @endif
-            @endif
+            @endif --}}
         </div>
 
         <!-- Ticket Actions -->

@@ -1,0 +1,8 @@
+Fitur User
+1.  Animasi Di User Perlu di rapihkan karna terlihat ada bugs
+2.  [2026-01-30 12:43:31] local.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'category_id' in 'where clause' (Connection: mysql, SQL: select `id`, `sub_category_name` from `problem_sub_categories` where `category_id` = 7 order by `sub_category_name` asc) {"userId":7,"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'category_id' in 'where clause' (Connection: mysql, SQL: select `id`, `sub_category_name` from `problem_sub_categories` where `category_id` = 7 order by `sub_category_name` asc) at /Users/saptosimanjuntak/Project/Laravel/Laravel10/sipantauV2/vendor/laravel/framework/src/Illuminate/Database/Connection.php:829)
+[stacktrace]
+3. Merapihkan Kategori dan Sub Kategori yang sesuai
+4. Menambahkan Pagination Halaman index
+5. Profile Untuk ganti password
+
