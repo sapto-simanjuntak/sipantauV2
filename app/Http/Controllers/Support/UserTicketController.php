@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Support;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Modul\HospitalUnit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Modul\ServiceRequest;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Master\ProblemCategory;
+use App\Models\Modul\ServiceRequestLog;
+use Illuminate\Support\Facades\Storage;
 
 class UserTicketController extends Controller
 {
@@ -313,7 +317,23 @@ class UserTicketController extends Controller
     {
         $ticket = ServiceRequest::where('ticket_number', $ticket_number)->firstOrFail();
 
-        // Authorization check (sama seperti edit)
+        // ✅ SIMPAN DATA LAMA SEBELUM UPDATE
+        $oldValues = $ticket->only([
+            'requester_name',
+            'requester_phone',
+            'unit_id',
+            'issue_title',
+            'description',
+            'problem_category_id',
+            'problem_sub_category_id',
+            'severity_level',
+            'priority',
+            'location',
+            'device_affected',
+            'expected_action',
+        ]);
+
+        // Authorization check
         $user = auth()->user();
 
         if (!$user->hasAnyRole(['admin', 'superadmin'])) {
@@ -334,7 +354,7 @@ class UserTicketController extends Controller
             }
         }
 
-        // ✅ Base validation
+        // Validation rules
         $rules = [
             'requester_name' => 'required|string|max:100',
             'requester_phone' => 'nullable|string|max:20',
@@ -352,10 +372,8 @@ class UserTicketController extends Controller
             'file_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ];
 
-        // ✅ Get category untuk conditional validation
         $category = ProblemCategory::find($request->problem_category_id);
 
-        // ✅ Conditional validation for Network category
         if ($category && $category->category_code === 'NET') {
             $rules['ip_address'] = 'nullable|ip';
             $rules['connection_status'] = 'nullable|string';
@@ -363,14 +381,12 @@ class UserTicketController extends Controller
 
         $validated = $request->validate($rules);
 
-        // ✅ Clean up NULL/empty values
         $validated = array_filter($validated, function ($value) {
             return !is_null($value) && $value !== '';
         });
 
-        // Handle file upload (jika ada file baru)
+        // Handle file upload
         if ($request->hasFile('file_path')) {
-            // Delete old file if exists
             if ($ticket->file_path && Storage::disk('public')->exists($ticket->file_path)) {
                 Storage::disk('public')->delete($ticket->file_path);
             }
@@ -379,24 +395,34 @@ class UserTicketController extends Controller
             $filename = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('tickets', $filename, 'public');
             $validated['file_path'] = $filePath;
+
+            // ✅ LOG FILE UPLOAD
+            $this->logFileActivity($ticket, 'file_uploaded', $filename, $user, $request);
         }
 
-        // Recalculate priority if severity or unit changed
+        // Recalculate priority
         $unit = HospitalUnit::find($validated['unit_id']);
         $validated['priority'] = $this->calculatePriority(
             $validated['severity_level'],
             $unit->unit_type
         );
 
-        // Recalculate SLA if category changed
+        // Recalculate SLA
         if ($ticket->problem_category_id != $validated['problem_category_id']) {
             $validated['sla_deadline'] = now()->addHours($category->default_sla_hours);
         }
 
-        // Update ticket
-        $ticket->update($validated);
+        // ✅ UPDATE TICKET DALAM TRANSACTION
+        DB::transaction(function () use ($ticket, $validated, $oldValues, $user, $request) {
+            $ticket->update($validated);
 
-        // ✅ Role-based redirect (sama seperti store)
+            // ✅ LOG PERUBAHAN
+            $this->logTicketUpdate($ticket, $oldValues, $validated, $user, $request);
+
+            // ✅ CLEAR CACHE
+            Cache::forget("user_stats_{$user->id}");
+        });
+
         $redirectUrl = route('service.index');
         if ($user->hasRole('user') && !$user->hasAnyRole(['superadmin', 'admin', 'teknisi'])) {
             $redirectUrl = route('ticket.index');
@@ -414,5 +440,132 @@ class UserTicketController extends Controller
             'ticket_number' => $ticket_number,
             'redirect_url' => $redirectUrl
         ]);
+    }
+
+    // =========================================
+    // ✅ LOGGING METHODS (TAMBAHKAN INI)
+    // =========================================
+
+    /**
+     * Log ticket update activity
+     */
+    private function logTicketUpdate($ticket, array $oldValues, array $newValues, $user, Request $request): void
+    {
+        // Detect perubahan
+        $changes = [];
+        foreach ($newValues as $key => $newValue) {
+            if (isset($oldValues[$key]) && $oldValues[$key] != $newValue) {
+                $changes[$key] = [
+                    'old' => $oldValues[$key],
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        if (empty($changes)) {
+            return; // Tidak ada perubahan
+        }
+
+        // Generate human-readable notes
+        $notes = $this->generateUpdateNotes($changes);
+
+        ServiceRequestLog::create([
+            'service_request_id' => $ticket->id,
+            'user_id' => $user->id,
+            'action_type' => 'ticket_update',
+            'notes' => $notes,
+            'old_status' => null,
+            'new_status' => null,
+            'metadata' => json_encode([
+                'changes' => $changes,
+                'updated_by_role' => $user->getRoleNames()->first(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'timestamp' => now()->toDateTimeString(),
+            ])
+        ]);
+    }
+
+    /**
+     * Log file upload/delete activity
+     */
+    private function logFileActivity($ticket, string $actionType, string $filename, $user, Request $request): void
+    {
+        ServiceRequestLog::create([
+            'service_request_id' => $ticket->id,
+            'user_id' => $user->id,
+            'action_type' => 'file',
+            'notes' => $actionType === 'file_uploaded'
+                ? "File uploaded: {$filename}"
+                : "File deleted: {$filename}",
+            'old_status' => null,
+            'new_status' => null,
+            'metadata' => json_encode([
+                'action' => $actionType,
+                'filename' => $filename,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'timestamp' => now()->toDateTimeString(),
+            ])
+        ]);
+    }
+
+    /**
+     * Generate human-readable update notes
+     */
+    private function generateUpdateNotes(array $changes): string
+    {
+        $notes = [];
+
+        $fieldLabels = [
+            'requester_name' => 'Nama Pelapor',
+            'requester_phone' => 'No. Telepon',
+            'unit_id' => 'Unit',
+            'issue_title' => 'Judul Masalah',
+            'description' => 'Deskripsi',
+            'problem_category_id' => 'Kategori',
+            'problem_sub_category_id' => 'Sub-Kategori',
+            'severity_level' => 'Tingkat Keparahan',
+            'priority' => 'Prioritas',
+            'location' => 'Lokasi',
+            'device_affected' => 'Perangkat',
+            'expected_action' => 'Tindakan yang Diharapkan',
+        ];
+
+        foreach ($changes as $field => $change) {
+            $label = $fieldLabels[$field] ?? ucfirst(str_replace('_', ' ', $field));
+            $notes[] = "{$label} diubah dari '{$change['old']}' ke '{$change['new']}'";
+        }
+
+        return implode(', ', $notes);
+    }
+
+    /**
+     * Calculate priority helper (jika belum ada)
+     */
+    private function calculatePriority(string $severity, string $unitType): string
+    {
+        // Critical severity = Critical priority
+        if ($severity === 'Kritis') {
+            return 'Critical';
+        }
+
+        // High severity = High priority
+        if ($severity === 'Tinggi') {
+            return 'High';
+        }
+
+        // Medium severity + critical unit = High priority
+        if ($severity === 'Sedang' && $unitType === 'critical') {
+            return 'High';
+        }
+
+        // Medium severity + non-critical unit = Medium priority
+        if ($severity === 'Sedang') {
+            return 'Medium';
+        }
+
+        // Low severity = Low priority
+        return 'Low';
     }
 }

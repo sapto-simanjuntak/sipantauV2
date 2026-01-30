@@ -30,6 +30,7 @@ use App\Http\Controllers\Project\DashboardController;
 use App\Http\Controllers\Support\UserTicketController;
 use App\Http\Controllers\Support\ServiceRequestController;
 use App\Http\Controllers\Support\SignatureVerificationController;
+use App\Http\Controllers\Support\TechnicianController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -145,15 +146,6 @@ Route::prefix('verify')->name('verify.')->group(function () {
     Route::get('/history/{ticketNumber}', [SignatureVerificationController::class, 'history'])->name('history');
 });
 
-// AJAX ROUTES
-// Route::prefix('ajax')->group(function () {
-//     Route::get('/hospital-units', [AjaxController::class, 'getHospitalUnits']);
-//     Route::get('/problem-categories', [AjaxController::class, 'getProblemCategories']);
-//     Route::get('/sub-categories/{categoryId}', [AjaxController::class, 'getSubCategories']);
-//     Route::get('/ticket-statistics', [AjaxController::class, 'getTicketStatistics']);
-// });
-
-
 Route::group(['middleware' => ['role:superadmin|admin|user']], function () {
     Route::get('/ticket-user', [UserTicketController::class, 'index'])->name('ticket.index');
     Route::get('/stats', [UserTicketController::class, 'getStats'])->name('stats');
@@ -162,4 +154,13 @@ Route::group(['middleware' => ['role:superadmin|admin|user']], function () {
     Route::get('/ticket-mobile/{ticket_number}', [UserTicketController::class, 'show'])->name('ticket.show');
     Route::get('/ticket-mobile/{ticket_number}/edit', [UserTicketController::class, 'edit'])->name('ticket.edit');
     Route::post('/ticket-mobile/{ticket_number}/update', [UserTicketController::class, 'update'])->name('ticket.update');
+});
+
+// Technician Routes (Mobile)
+Route::middleware(['auth', 'role:technician|teknisi'])->prefix('technician')->name('technician.')->group(function () {
+    Route::get('/tickets', [TechnicianController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{ticket_number}', [TechnicianController::class, 'show'])->name('ticket.show');
+    Route::post('/tickets/{ticket_number}/update-status', [TechnicianController::class, 'updateStatus'])->name('ticket.update-status');
+    Route::post('/tickets/{ticket_number}/add-note', [TechnicianController::class, 'addNote'])->name('ticket.add-note');
+    Route::get('/stats', [TechnicianController::class, 'getStats'])->name('stats');
 });

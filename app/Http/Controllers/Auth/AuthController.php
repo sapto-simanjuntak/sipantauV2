@@ -47,27 +47,25 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (auth()->attempt($credentials)) {
-
-            $request->session()->regenerate();
-
-            $user = auth()->user();
-
-            if ($user->hasRole(['superadmin', 'admin'])) {
-                return redirect()->route('dashboard');
-            }
-
-            if ($user->hasRole('user')) {
-                return redirect()->route('ticket.index');
-            }
-
-            auth()->logout();
-            abort(403, 'Role tidak valid.');
+        if (!auth()->attempt($credentials)) {
+            return back()
+                ->withErrors(['email' => 'Email or password is incorrect.'])
+                ->withInput();
         }
 
-        return back()
-            ->withErrors(['email' => 'Email or password is incorrect.'])
-            ->withInput();
+        $request->session()->regenerate();
+        $user = auth()->user();
+
+        // ✅ Route berdasarkan role
+        return match (true) {
+            $user->hasRole(['superadmin', 'admin']) => redirect()->route('dashboard'),
+            $user->hasRole(['teknisi']) => redirect()->route('technician.tickets.index'),
+            $user->hasRole(['user']) => redirect()->route('ticket.index'),
+            default => tap(null, function () {
+                auth()->logout();
+                abort(403, 'Role tidak valid.');
+            })
+        };
     }
 
     public function logout()
